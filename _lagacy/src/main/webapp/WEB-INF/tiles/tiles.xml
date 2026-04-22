@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+	<!-- 로그인 팝업 페이지 -->
+	<definition name="login" template="/WEB-INF/jsp/layout/layout3.jsp">
+		<put-attribute name="body" 		value="" />
+	</definition>
+
+	<definition name="/login/*" extends="login">
+		<put-attribute name="body" value="/WEB-INF/jsp/body/{1}.jsp" />
+	</definition>
+
+	<!-- 단독 페이지 -->
+	<definition name="alone" template="/WEB-INF/jsp/layout/layout2.jsp">
+		<put-attribute name="body" 		value="" />
+	</definition>
+
+	<!-- (1) -->
+	<definition name="/alone/*" extends="alone">
+	  <put-attribute name="body" value="/WEB-INF/jsp/body/{1}.jsp" />
+	</definition>
+
+	<!-- base tiles layout add -->
+	<definition name="base" template="/WEB-INF/jsp/layout/layout.jsp">
+		<put-attribute name="header"	value="/WEB-INF/jsp/layout/header.jsp" />
+		<put-attribute name="view" 		value="" />
+		<put-attribute name="footer"	value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="*" extends="base">
+		<put-attribute name="view"		value="/WEB-INF/jsp/body/{1}.jsp" />
+	</definition>
+
+	<definition name="*/*" extends="base">
+		<put-attribute name="view"		value="/WEB-INF/jsp/body/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="*/*/*" extends="base">
+		<put-attribute name="view"		value="/WEB-INF/jsp/body/{1}/{2}/{3}.jsp" />
+	</definition>
+
+
+</tiles-definitions>

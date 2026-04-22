@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jaram.common.mapper.CommonMapper">
+
+    <!-- editor message 저장 -->
+    <insert id="insertEditorMessage" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="SEQ">
+        /* jaram.common.mapper.CommonMapper.insertEditorMessage */
+        INSERT INTO EDT_MSG_INFO
+        (
+              SEQ
+            , EDT_ID
+            , EDT_TEXT
+            , EDT_TITLE
+            , EDT_SUB_TITLE
+            , PAGE
+            , MAIN_IMG_PATH
+            , QNA_PASSWORD
+            , QNA_SECURE_YN
+            , INPUT_DT
+            , INPUT_ID
+            , INPUT_NAME
+            , UPDATE_DT
+            , UPDATE_ID
+            , UPDATE_NAME
+        )
+        VALUE
+        (
+              #{SEQ}
+            , #{EDT_ID}
+            , #{EDT_TEXT}
+            , #{EDT_TITLE}
+            , #{EDT_SUB_TITLE}
+            , #{PAGE}
+            , #{MAIN_IMG_PATH}
+            , #{QNA_PASSWORD}
+            , IFNULL(#{QNA_SECURE_YN}, 'N')
+            , IFNULL(#{INPUT_DT}, NOW())
+            , #{INPUT_ID}
+            , #{INPUT_NAME}
+            , NOW()
+            , #{UPDATE_ID}
+            , #{UPDATE_NAME}
+            )
+        ON DUPLICATE KEY UPDATE
+             EDT_TITLE     = #{EDT_TITLE}
+           , EDT_SUB_TITLE = #{EDT_SUB_TITLE}
+           , EDT_TEXT      = #{EDT_TEXT}
+           , MAIN_IMG_PATH = #{MAIN_IMG_PATH}
+           , QNA_SECURE_YN = IFNULL(#{QNA_SECURE_YN}, 'N')
+           , UPDATE_DT     = NOW()
+           , UPDATE_ID     = #{INPUT_ID}
+    </insert>
+
+    <!-- editor message 삭제 -->
+    <delete id="deleteEditorMessage" parameterType="java.util.HashMap">
+        /* jaram.common.mapper.CommonMapper.deleteEditorMessage [editor message 삭제] */
+        UPDATE  EDT_MSG_INFO
+        SET     DEL_YN = 'Y'
+        WHERE   SEQ = #{SEQ}
+        AND     PAGE = #{PAGE}
+    </delete>
+
+    <!-- editor message 조회 -->
+    <select id="selectEditorMessage" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        /* jaram.common.mapper.CommonMapper.selectEditorMessage */
+        SELECT  SEQ
+              , EDT_ID
+              , EDT_TITLE
+              , EDT_SUB_TITLE
+              , EDT_TEXT
+              , PAGE
+              , MAIN_IMG_PATH
+              , QNA_PASSWORD
+              , QNA_SECURE_YN
+              , VIEW_CNT
+              , CASE WHEN  TIMESTAMPDIFF(MINUTE , UPDATE_DT, NOW()) <![CDATA[ < ]]> 1440
+                     THEN CASE WHEN TIMESTAMPDIFF(MINUTE , UPDATE_DT, NOW()) <![CDATA[ < ]]>  60
+                               THEN CONCAT( TIMESTAMPDIFF(MINUTE , UPDATE_DT, NOW()) , '분 전')
+                               ELSE CONCAT( TIMESTAMPDIFF(HOUR , UPDATE_DT, NOW()) , '시간 전')
+                          END
+                     ELSE DATE_FORMAT(UPDATE_DT, '%Y-%m-%d')
+                END AS INPUT_DT
+              , INPUT_ID
+              , INPUT_NAME
+              , NOW_SESSION
+        FROM    EDT_MSG_INFO
+        WHERE   PAGE   = #{PAGE}
+        <if test="SEQ!=null and !SEQ.equals('')">
+        AND     SEQ = #{SEQ}
+        </if>
+        <if test="SEQ==null or SEQ.equals('')">
+        AND     SEQ = ( SELECT MAX(SEQ) FROM EDT_MSG_INFO WHERE PAGE = #{PAGE} )
+        </if>
+        AND     DEL_YN != 'Y'
+    </select>
+
+    <!-- editor message list 조회 -->
+    <select id="selectEditorMessageList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        /* jaram.common.mapper.CommonMapper.selectEditorMessageList [editor message list 조회]*/
+        SELECT  @ROWNUM:=@ROWNUM+1 AS RN
+              , SEQ
+              , EDT_ID
+              , EDT_TITLE
+              , EDT_SUB_TITLE
+              , EDT_TEXT
+              , PAGE
+              , MAIN_IMG_PATH
+              , QNA_PASSWORD
+              , QNA_SECURE_YN
+              , VIEW_CNT
+              , CASE WHEN  TIMESTAMPDIFF(MINUTE , UPDATE_DT, NOW()) <![CDATA[ < ]]>  1440
+                     THEN CASE WHEN TIMESTAMPDIFF(MINUTE , UPDATE_DT, NOW()) <![CDATA[ < ]]>  60
+                               THEN CONCAT( TIMESTAMPDIFF(MINUTE , UPDATE_DT, NOW()) , '분 전')
+                               ELSE CONCAT( TIMESTAMPDIFF(HOUR , UPDATE_DT, NOW()) , '시간 전')
+                          END
+                     ELSE DATE_FORMAT(UPDATE_DT, '%Y-%m-%d')
+                END AS INPUT_DT
+              , INPUT_ID
+              , INPUT_NAME
+              , (SELECT COUNT(*) FROM BOARD_COMMENT S1 WHERE S1.EDT_SEQ = SEQ AND S1.DEL_YN != 'Y') AS COMMENT_CNT
+              , (SELECT COUNT(*) FROM FILE_INFO S2 WHERE S2.EDT_SEQ = T1.SEQ) AS FILE_CNT
+              , QNA_SECURE_YN
+        FROM    EDT_MSG_INFO T1
+        WHERE   PAGE   = #{PAGE}
+        AND     DEL_YN != 'Y'
+        AND     (@ROWNUM:=0) = 0
+        <if test="SEARCH_TITLE != null and !SEARCH_TITLE.equals('')">
+        AND     EDT_TITLE LIKE CONCAT('%', #{SEARCH_TITLE} , '%')
+        </if>
+        ORDER   BY UPDATE_DT DESC, INPUT_DT DESC
+    </select>
+
+    <!-- file list 조회 -->
+     <select id="selectFileList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+         /* jaram.common.mapper.CommonMapper.selectFileList [file list 조회]*/
+         SELECT  SEQ
+               , EDT_SEQ
+               , ORG_FILE_NAME
+               , SAVE_FILE_NAME
+               , FILE_SIZE
+               , DATE_FORMAT(INPUT_DT, '%y%m%d') AS INPUT_DT
+               , INPUT_ID
+         FROM    FILE_INFO
+         WHERE   EDT_SEQ = #{SEQ}
+     </select>
+
+    <!-- file 저장 -->
+    <insert id="insertFileInfo" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="SEQ">
+        /* jaram.common.mapper.CommonMapper.insertFileInfo [file 저장] */
+        INSERT INTO FILE_INFO
+        (
+              EDT_SEQ
+            , COMMENT_SEQ
+            , ORG_FILE_NAME
+            , SAVE_FILE_NAME
+            , FILE_SIZE
+            , INPUT_DT
+            , INPUT_ID
+        )
+        VALUE
+        (
+              #{EDT_SEQ}
+            , #{COMMENT_SEQ}
+            , #{ORG_FILE_NAME}
+            , #{SAVE_FILE_NAME}
+            , #{FILE_SIZE}
+            , NOW()
+            , #{INPUT_ID}
+        )
+    </insert>
+
+    <!-- file 조회 -->
+     <select id="selectOneFile" parameterType="long" resultType="java.util.HashMap">
+         /* jaram.common.mapper.CommonMapper.selectOneFile [file 조회]*/
+         SELECT  SEQ
+               , EDT_SEQ
+               , ORG_FILE_NAME
+               , SAVE_FILE_NAME
+               , FILE_SIZE
+               , DATE_FORMAT(INPUT_DT, '%y%m%d') AS INPUT_DT
+               , INPUT_ID
+         FROM    FILE_INFO
+         WHERE   SEQ = #{FILE_SEQ}
+     </select>
+
+    <!-- file 삭제 -->
+    <delete id="deleteFileInfo" parameterType="java.util.HashMap">
+        /* jaram.common.mapper.CommonMapper.deleteFileInfo [file 삭제] */
+        DELETE  FROM FILE_INFO
+        WHERE   SEQ = #{FILE_SEQ}
+    </delete>
+
+    <!-- 에러 로그 저장 -->
+    <insert id="insertErrorLog" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="SEQ">
+        /* jaram.common.mapper.CommonMapper.insertErrorLog [file 저장] */
+        INSERT INTO ERR_LOG
+        (
+            ERR_CODE
+          , ERR_MSG
+          , USER_IP
+          , NOW()
+          , #{INPUT_ID}
+        )
+        VALUE
+        (
+              #{ERR_CODE}
+            , #{ERR_MSG}
+            , #{USER_IP}
+            , NOW()
+            , #{INPUT_ID}
+        )
+    </insert>
+
+    <!-- 사이트 정책 조회 -->
+     <select id="selectSitePolicy"  parameterType="java.util.HashMap" resultType="java.util.HashMap">
+         SELECT  /* jaram.common.mapper.CommonMapper.selectSitePolicy [사이트 정책 조회]*/
+                 POLICY_CODE
+               , POLICY_NAME
+               , CONVERT(POLICY_CONTENT USING UTF8) AS POLICY_CONTENT
+               , INPUT_DT
+               , INPUT_ID
+               , UPDATE_DT
+               , UPDATE_ID
+         FROM    SITE_POLICY
+         WHERE   POLICY_CODE = #{POLICY_CODE}
+     </select>
+
+    <!-- 사이트 정책 목록 조회 -->
+     <select id="selectSitePolicyList"  parameterType="java.util.HashMap" resultType="java.util.HashMap">
+         SELECT  /* jaram.common.mapper.CommonMapper.selectSitePolicyList [사이트 정책 목록 조회]*/
+                 POLICY_CODE
+               , POLICY_NAME
+               , CONVERT(POLICY_CONTENT USING UTF8) AS POLICY_CONTENT
+               , INPUT_DT
+               , INPUT_ID
+               , UPDATE_DT
+               , UPDATE_ID
+         FROM    SITE_POLICY
+         ORDER
+         BY      ORD
+     </select>
+
+</mapper>

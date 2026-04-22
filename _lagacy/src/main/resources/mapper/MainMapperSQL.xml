@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jaram.main.mapper.MainMapper">
+
+    <!-- 소통공간 게시글 신규 여부 -->
+    <select id="selectCommunityNewCnt" resultType="java.util.HashMap" >
+        /* jaram.main.mapper.MainMapper.selectCommunityNewCnt [소통공간 게시글 신규글 여부] */
+        SELECT  MAX(IF(PG = 'ceo', CNT, 0)) AS CEO
+              , MAX(IF(PG = 'notice', CNT, 0)) AS NOTICE
+              , MAX(IF(PG = 'news', CNT, 0)) AS NEWS
+              , MAX(IF(PG = 'gallery', CNT, 0)) AS GALLERY
+              , MAX(IF(PG = 'faq', CNT, 0)) AS FAQ
+              , MAX(IF(PG = 'qna', CNT, 0)) AS QNA
+        FROM  (
+                 SELECT  T1.PAGE  AS PG
+                       , COUNT(*) AS CNT
+                 FROM  (
+                          SELECT DISTINCT PAGE FROM EDT_MSG_INFO
+                       ) T1
+                 LEFT    JOIN
+                         EDT_MSG_INFO T2
+                 ON      T1.PAGE = T2.PAGE
+                 WHERE   UPDATE_DT >= DATE_ADD(NOW(), INTERVAL -7 DAY)
+                 AND     DEL_YN != 'Y'
+                 GROUP
+                 BY      T1.PAGE
+             ) T1
+    </select>
+
+    <!-- 메인 헤더 새소식 2개 -->
+    <select id="selectMainHeaderNews" resultType="java.util.HashMap" >
+        /* jaram.main.mapper.MainMapper.selectMainHeaderNews [메인 헤더 새소식 2개] */
+           SELECT SEQ
+                , EDT_TITLE
+                , EDT_SUB_TITLE
+                , EDT_TEXT
+                , MAIN_IMG_PATH
+           FROM EDT_MSG_INFO T1
+           WHERE PAGE = 'news'
+           AND   DEL_YN != 'Y'
+           ORDER BY INPUT_DT DESC
+    </select>
+
+    <insert id="insertErrorLog" parameterType="hashmap">
+        INSERT
+        INTO ERR_LOG
+            (
+                  ERR_CODE
+                , ERR_MSG
+                , USER_IP
+                , INPUT_DT
+                , INPUT_ID
+            )
+        VALUES
+            (
+                 #{ERR_CODE}
+               , #{ERR_MSG}
+               , #{USER_IP}
+               , NOW()
+               , #{EMAIL}
+            )
+    </insert>
+</mapper>

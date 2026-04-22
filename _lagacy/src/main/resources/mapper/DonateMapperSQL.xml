@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jaram.menu.mapper.DonateMapper">
+    <!-- 후원신청서 저장 -->
+    <insert id="insertDonateReqForm" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="DONATE_SEQ">
+        /** jaram.menu.mapper.DonateMapper.insertDonateReqForm [후원신청서 저장] */
+        INSERT INTO DONATE_INFO
+        (
+              DONATE_SEQ
+            , USER_ID
+            , REQ_NAME
+            , REQ_PHONE
+            , REQ_EMAIL
+            , DONATE_AMOUNT
+            , DONATE_SURVEY_01
+            , DONATE_SURVEY_TEXT_01
+            , DONATE_SURVEY_02
+            , DONATE_SURVEY_TEXT_02
+            , RESI_NUM
+            , INPUT_DT
+            , INPUT_ID
+            , INPUT_NAME
+        )
+        VALUE
+        (
+              #{DONATE_SEQ}
+            , #{INPUT_ID}
+            , #{REQ_NAME}
+            , #{REQ_PHONE}
+            , #{REQ_EMAIL}
+            , #{DONATE_AMOUNT}
+            , #{DONATE_SURVEY_01}
+            , #{DONATE_SURVEY_TEXT_01}
+            , #{DONATE_SURVEY_02}
+            , #{DONATE_SURVEY_TEXT_02}
+            , #{RESI_NUM}
+            , NOW()
+            , #{INPUT_ID}
+            , #{INPUT_NAME}
+            )
+    </insert>
+
+    <!-- 후원신청서 암호화 시퀀스 저장 -->
+    <update id="updateEncDonateSeq" parameterType="java.util.HashMap" >
+        /** jaram.menu.mapper.DonateMapper.updateEncDonateSeq [후원신청서 암호화 시퀀스 저장] */
+        UPDATE  DONATE_INFO
+        SET     ENC_DONATE_SEQ = HEX(AES_ENCRYPT(#{DONATE_SEQ}, SHA2('jaramdb@123', 256)))
+        WHERE   DONATE_SEQ = #{DONATE_SEQ}
+    </update>
+
+    <!-- 후원신청서 상세 조회 -->
+    <select id="selectDonateReqForm" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        /** jaram.menu.mapper.DonateMapper.selectDonateReqForm [후원신청서 상세 조회] */
+        SELECT  DONATE_SEQ
+              , ENC_DONATE_SEQ
+              , USER_ID
+              , REQ_NAME
+              , REQ_PHONE
+              , REQ_EMAIL
+              , DONATE_AMOUNT
+              , DONATE_SURVEY_01
+              , DONATE_SURVEY_TEXT_01
+              , DONATE_SURVEY_02
+              , DONATE_SURVEY_TEXT_02
+              , RESI_NUM
+              , INPUT_DT
+              , INPUT_ID
+              , INPUT_NAME
+        FROM    DONATE_INFO
+        <where>
+            <if test="DONATE_SEQ != null and !DONATE_SEQ.equals('')">
+                DONATE_SEQ = #{DONATE_SEQ}
+            </if>
+            <if test="ENC_DONATE_SEQ != null and !ENC_DONATE_SEQ.equals('')">
+                ENC_DONATE_SEQ = #{ENC_DONATE_SEQ}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

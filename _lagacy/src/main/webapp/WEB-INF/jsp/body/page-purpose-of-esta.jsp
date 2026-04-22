@@ -1,0 +1,223 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/security/tags" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script>
+		/** editor upload **/
+		function MyCustomUploadAdapterPlugin(editor) {
+			editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+				return new UploadAdapter(loader)
+			}
+		}
+
+		$(function () {
+			<!-- 대표인사말 editor -->
+			$("#edit-btn-01").off("click").on("click", function () {
+				if ($("#edit-btn-icon-01").hasClass("bi-pencil")) {
+					ClassicEditor
+						.create(document.querySelector('#editor01'), {
+							extraPlugins: [MyCustomUploadAdapterPlugin]
+							, toolbar: ['undo', 'redo'
+								, '|', 'bold', 'italic', 'underline'
+								, '|', 'fontSize', 'fontColor', 'fontBackgroundColor', 'highLight'
+								, '|', 'link', 'imageUpload', 'insertTable', 'blockQuote'
+								, '|', 'bulletedList', 'numberedList']
+							, table: {
+								contentToolbar: [
+									'tableColumn',
+									'tableRow',
+									'mergeTableCells'
+								]
+							}
+						})
+						.then(editor => {
+							window.editor01 = editor;
+							editor01.setData($("#esta-text").html());
+						})
+						.catch(error => {
+							console.error(error);
+						});
+					$("#esta-text").hide();
+					$("#edit-btn-icon-01").removeClass("bi-pencil");
+					$("#edit-btn-icon-01").addClass("bi-save");
+				} else {
+					editor01.destroy()
+						.catch(error => {
+							console.log(error);
+						});
+
+					$("#esta-text").show();
+
+					$("#edit-btn-icon-01").addClass("bi-pencil");
+					$("#edit-btn-icon-01").removeClass("bi-save");
+
+					//editor 메세지 저장
+					fnSaveEditorMsg("editor01", "설립취지문");
+				}
+			})
+
+		});
+
+		/**
+		 * editor 메세지 저장
+		 */
+		function fnSaveEditorMsg(editor, editorName) {
+			let data = {
+				SEQ: $("#seq").val()
+				, EDT_ID: editor
+				, EDT_NAME: editorName
+				, EDT_TEXT: editor01.getData()
+				, EDT_TITLE: editorName
+				, PAGE: 'esta'
+			};
+			//FormData 새로운 객체 생성
+			let formData = new FormData();
+			// 'key'라는 이름으로 위에서 담은 data를 formData에 append한다. type은 json
+			formData.append('key', new Blob([JSON.stringify(data)], {type: "application/json"}));
+			cfn_ajaxTransmit("/save-editor-message", formData, null, false);
+		}
+
+
+		/**
+		 * Ajax callback
+		 */
+		function fn_callBack(id, res, stat) {
+			if (id === '/save-editor-message') {
+				if (stat === "success") {
+					$('#esta-text *').remove();
+					$("#esta-text").append(res.EDT_INFO.EDT_TEXT);
+				} else {
+					$.alert(id + "\n" + res + "\n" + stat);
+				}
+			}
+		}
+	</script>
+</head>
+<body>
+
+<div class="container content-space-3 content-space-lg-3">
+	<div class="row">
+		<div id="stickyBlockStartPointEg2" class="col-md-3 col-lg-2 mb-3 mb-md-0">
+			<!-- Navbar -->
+			<div class="navbar-expand-md">
+				<!-- Navbar Toggle -->
+				<div class="d-grid">
+					<button type="button" class="navbar-toggler btn btn-white mb-3" data-bs-toggle="collapse" data-bs-target="#navbarVerticalNavMenuEg2" aria-label="Toggle navigation"
+					        aria-expanded="false" aria-controls="navbarVerticalNavMenuEg2">
+            <span class="d-flex justify-content-between align-items-center">
+              <span class="text-dark mb-0">Menu</span>
+
+              <span class="navbar-toggler-default">
+                <i class="bi-list"></i>
+              </span>
+
+              <span class="navbar-toggler-toggled">
+                <i class="bi-x"></i>
+              </span>
+            </span>
+					</button>
+				</div>
+				<!-- End Navbar Toggle -->
+				
+				<!-- Navbar Collapse -->
+				<div id="navbarVerticalNavMenuEg2" class="collapse navbar-collapse">
+					<ul id="navbarSettingsEg2" class="js-sticky-block js-scrollspy nav nav-tabs nav-link-gray nav-vertical"
+					    data-hs-sticky-block-options='{
+										               "parentSelector": "#navbarVerticalNavMenuEg2",
+										               "targetSelector": "#header",
+										               "breakpoint": "md",
+										               "startPoint": "#navbarVerticalNavMenuEg2",
+										               "endPoint": "#stickyBlockEndPointEg2",
+										               "stickyOffsetTop": 100
+										             }'>
+						<li class="nav-item">
+							<a class="nav-link " href="/ceo">1. 대표 소개</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link active" href="/page-purpose-of-esta">2. 설립취지문</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/page-vision-mission">3. 비전과 미션</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/page-organization">4. 조직도</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/page-location">5. 오시는길</a>
+						</li>
+					</ul>
+				</div>
+				<!-- End Navbar Collapse -->
+			</div>
+			<!-- End Navbar -->
+		</div>
+		<!-- End Col -->
+		
+		<!-- Testimonials -->
+		<div class="col-md-9 col-lg-10">
+			<h2>설립취지문</h2>
+			<hr/>
+				<div class="container content-space-2">
+					<div class="justify-content-evenly align-items-md-center">
+						<!-- Blockquote -->
+						<figure class="blockquote-lg mb-7">
+							<!-- 대표 인삿말 ckeditor -->
+							<div id="editor01"></div>
+							
+							<div id="esta-text" style="line-height: inherit;">
+								<c:if test="${edtMessage.boardInfo.EDT_ID == 'editor01'}">
+									${edtMessage.boardInfo.EDT_TEXT}
+									<input type="hidden" id="seq" value="${edtMessage.boardInfo.SEQ}">
+								</c:if>
+							</div>
+							<s:authorize access="hasRole('ADMIN')">
+								<button type="button" class="btn btn-primary btn-icon btn-sm ckeditor-btn z98" id="edit-btn-01">
+									<i class="bi bi-pencil" id="edit-btn-icon-01"></i>
+								</button>
+							</s:authorize>
+						</figure>
+						<!-- End Blockquote -->
+					</div>
+					<!-- End Row -->
+				</div>
+			<!-- Blockquote -->
+			<figure class="blockquote-lg mb-7 mt-10">
+				<blockquote class="blockquote">“사려 깊고 헌신하는 작은 시민 집단이 세상을 바꿀 수 있다는 것을 믿어 의심치 않습니다. <br>시민이야말로 지금까지 세상을 바꿔온 유일한 존재입니다.”</blockquote>
+				
+				<figcaption class="blockquote-footer">
+					<div class="d-flex align-items-center">
+						<div class="flex-shrink-0">
+							<img class="avatar avatar-circle" src="../assets/img/160x160/img6.jpg" alt="Image Description">
+						</div>
+						<div class="flex-grow-1 ms-3">
+							Margaret Mead
+							<span class="blockquote-footer-source">미국 문화 인류학자</span>
+						</div>
+					</div>
+				</figcaption>
+			</figure>
+			<!-- End Blockquote -->
+			
+			<a class="link" href="#">후원하기 <i class="bi-chevron-right small ms-1"></i></a>
+		</div>
+		<!-- End Testimonials -->
+	</div>
+	
+	
+	<!-- End Sticky End Point -->
+	<div id="stickyBlockEndPointEg2"></div>
+
+</div>
+<script>
+	(function () {
+		// INITIALIZATION OF STICKY BLOCKS
+		// =======================================================
+		new HSStickyBlock('.js-sticky-block', {
+			targetSelector: document.getElementById('header').classList.contains('navbar-fixed') ? '#header' : null
+		})
+	})()
+</script>
+</body>
+</html>

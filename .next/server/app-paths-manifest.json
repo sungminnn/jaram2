@@ -1,0 +1,8 @@
+{
+  "/news/notices/page": "app/news/notices/page.js",
+  "/news/stories/page": "app/news/stories/page.js",
+  "/news/[category]/[id]/page": "app/news/[category]/[id]/page.js",
+  "/news/faq/page": "app/news/faq/page.js",
+  "/about/vision/page": "app/about/vision/page.js",
+  "/about/greeting/page": "app/about/greeting/page.js"
+}
