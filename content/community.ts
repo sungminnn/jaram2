@@ -4,7 +4,7 @@ export type CommunityCategory = "notices" | "stories" | "gallery" | "qna" | "faq
 
 export type CommunityPost = {
   id: string;
-  category: Exclude<CommunityCategory, "qna" | "faq">;
+  category: Exclude<CommunityCategory, "faq">;
   title: string;
   subtitle?: string;
   author: string;
@@ -12,7 +12,9 @@ export type CommunityPost = {
   views: number;
   image?: string;
   content: string[];
-  files?: { name: string; size: string }[];
+  files?: { name: string; size: string; url?: string }[];
+  hasFiles?: boolean;
+  isNew?: boolean;
 };
 
 export const communityNavigation = [
@@ -246,5 +248,5 @@ export function getCommunityPost(category: CommunityPost["category"], id: string
 }
 
 export function isPostCategory(category: string): category is CommunityPost["category"] {
-  return category === "notices" || category === "stories" || category === "gallery";
+  return category === "notices" || category === "stories" || category === "gallery" || category === "qna";
 }

@@ -1,8 +1,33 @@
 import Link from "next/link";
 import { ChevronRight, LogIn, Menu, Sprout, UserPlus } from "lucide-react";
 import { navigation } from "@/content/home";
+import { SupportPendingDialog } from "@/components/support-pending-dialog";
+import type { CommunityPost } from "@/content/community";
+import { getRecentCommunityCategories } from "@/lib/community-posts";
 
-export function SiteHeader() {
+function hrefCategory(href: string): CommunityPost["category"] | undefined {
+  if (href.startsWith("/news/notices")) {
+    return "notices";
+  }
+
+  if (href.startsWith("/news/stories")) {
+    return "stories";
+  }
+
+  if (href.startsWith("/news/gallery")) {
+    return "gallery";
+  }
+
+  if (href.startsWith("/news/qna")) {
+    return "qna";
+  }
+
+  return undefined;
+}
+
+export async function SiteHeader() {
+  const recentCategories = await getRecentCommunityCategories();
+
   return (
     <header className="sticky top-0 z-50 border-b border-forest/10 bg-cream/90 backdrop-blur-xl">
       <div className="mx-auto flex h-[5.5rem] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
@@ -25,7 +50,7 @@ export function SiteHeader() {
               >
                 {item.label}
               </Link>
-              <div className="invisible absolute left-1/2 top-full -translate-x-1/2 pt-4 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100">
+              <div className="invisible absolute left-[calc(50%+1.25rem)] top-full -translate-x-1/2 pt-4 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100">
                 <div
                   className={[
                     "rounded-lg border border-forest/10 bg-cream p-3 shadow-soft",
@@ -34,9 +59,6 @@ export function SiteHeader() {
                 >
                   {"feature" in item && item.feature ? (
                     <div className="flex min-h-64 flex-col rounded-md bg-mint p-6">
-                      <span className="mb-4 grid size-12 place-items-center rounded-xl bg-leaf text-white">
-                        <Sprout size={25} aria-hidden="true" />
-                      </span>
                       <p className="text-2xl font-bold text-forest">{item.feature.title}</p>
                       <p className="mt-3 text-base leading-7 text-muted">{item.feature.description}</p>
                       <div className="mt-auto grid gap-2 pt-8">
@@ -57,22 +79,40 @@ export function SiteHeader() {
                     <p className="px-3 py-2 text-sm font-bold text-muted">{item.label}</p>
                     {item.items.map((subItem) => {
                       const SubIcon = "icon" in subItem ? subItem.icon : null;
+                      const category = hrefCategory(subItem.href);
+                      const isNew = category ? recentCategories.has(category) : false;
 
                       return (
-                        <Link
-                          key={subItem.href}
-                          href={subItem.href}
-                          className="focus-ring group/link flex items-center gap-3 rounded-md px-3 py-3 text-base font-normal text-forest/84 transition hover:bg-mint hover:text-forest"
-                        >
-                          {SubIcon ? (
-                            <SubIcon className="size-5 shrink-0 text-leaf" aria-hidden="true" />
-                          ) : null}
-                          <span className="min-w-0 flex-1 truncate">{subItem.label}</span>
-                          {"isNew" in subItem && subItem.isNew ? (
-                            <span className="rounded-full bg-amber px-2 py-0.5 text-xs font-bold text-forest">NEW</span>
-                          ) : null}
-                          <ChevronRight className="size-4 shrink-0 translate-x-[-0.35rem] opacity-0 transition group-hover/link:translate-x-0 group-hover/link:opacity-100" aria-hidden="true" />
-                        </Link>
+                        subItem.href.startsWith("/support/") ? (
+                          <SupportPendingDialog
+                            key={subItem.href}
+                            className="focus-ring group/link flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-base font-normal text-forest/84 transition hover:bg-mint hover:text-forest"
+                          >
+                            {SubIcon ? (
+                              <SubIcon className="size-5 shrink-0 text-leaf" aria-hidden="true" />
+                            ) : null}
+                            <span className="min-w-0 flex-1 truncate">{subItem.label}</span>
+                            {isNew ? (
+                              <span className="shrink-0 rounded-full bg-leaf px-2 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                            ) : null}
+                            <ChevronRight className="size-4 shrink-0 translate-x-[-0.35rem] opacity-0 transition group-hover/link:translate-x-0 group-hover/link:opacity-100" aria-hidden="true" />
+                          </SupportPendingDialog>
+                        ) : (
+                          <Link
+                            key={subItem.href}
+                            href={subItem.href}
+                            className="focus-ring group/link flex items-center gap-3 rounded-md px-3 py-3 text-base font-normal text-forest/84 transition hover:bg-mint hover:text-forest"
+                          >
+                            {SubIcon ? (
+                              <SubIcon className="size-5 shrink-0 text-leaf" aria-hidden="true" />
+                            ) : null}
+                            <span className="min-w-0 flex-1 truncate">{subItem.label}</span>
+                            {isNew ? (
+                              <span className="shrink-0 rounded-full bg-leaf px-2 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                            ) : null}
+                            <ChevronRight className="size-4 shrink-0 translate-x-[-0.35rem] opacity-0 transition group-hover/link:translate-x-0 group-hover/link:opacity-100" aria-hidden="true" />
+                          </Link>
+                        )
                       );
                     })}
                   </div>
@@ -133,18 +173,33 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
                 <div className="grid gap-1 pl-3">
-                  {item.items.map((subItem) => (
-                    <Link
-                      key={subItem.href}
-                      href={subItem.href}
-                      className="focus-ring flex items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium text-muted transition hover:bg-mint hover:text-forest"
-                    >
-                      <span>{subItem.label}</span>
-                      {"isNew" in subItem && subItem.isNew ? (
-                        <span className="rounded-full bg-amber px-2 py-0.5 text-[0.65rem] font-bold text-forest">NEW</span>
-                      ) : null}
-                    </Link>
-                  ))}
+                  {item.items.map((subItem) => {
+                    const category = hrefCategory(subItem.href);
+                    const isNew = category ? recentCategories.has(category) : false;
+
+                    return subItem.href.startsWith("/support/") ? (
+                      <SupportPendingDialog
+                        key={subItem.href}
+                        className="focus-ring flex w-full items-center justify-between gap-3 rounded-md px-4 py-2 text-left text-sm font-medium text-muted transition hover:bg-mint hover:text-forest"
+                      >
+                        <span>{subItem.label}</span>
+                        {isNew ? (
+                          <span className="shrink-0 rounded-full bg-leaf px-2 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                        ) : null}
+                      </SupportPendingDialog>
+                    ) : (
+                      <Link
+                        key={subItem.href}
+                        href={subItem.href}
+                        className="focus-ring flex items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium text-muted transition hover:bg-mint hover:text-forest"
+                      >
+                        <span>{subItem.label}</span>
+                        {isNew ? (
+                          <span className="shrink-0 rounded-full bg-leaf px-2 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                        ) : null}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}

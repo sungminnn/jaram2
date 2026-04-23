@@ -15,12 +15,14 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CommunityTabs } from "@/components/community-tabs";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { SupportPendingDialog } from "@/components/support-pending-dialog";
 import {
   contact,
   facilities,
   programCards,
   quickLinks,
 } from "@/content/home";
+import { getCommunityPosts } from "@/lib/community-posts";
 
 const aboutValues = [
   { label: "안전한 돌봄", icon: ShieldCheck },
@@ -28,7 +30,13 @@ const aboutValues = [
   { label: "투명한 운영", icon: HandHeart },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [storyPosts, noticePosts, galleryPosts] = await Promise.all([
+    getCommunityPosts("stories"),
+    getCommunityPosts("notices"),
+    getCommunityPosts("gallery"),
+  ]);
+
   return (
     <>
       <AnimateOnScroll />
@@ -180,13 +188,14 @@ export default function Home() {
               </div>
               <div className="grid gap-5">
                 {facilities.map((facility) => (
-                  <article
+                  <Link
                     key={facility.name}
-                    className="reveal-card grid gap-5 rounded-lg border border-forest/10 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:shadow-soft sm:grid-cols-[11rem_1fr]"
+                    href={facility.href}
+                    className="focus-ring reveal-card grid gap-5 rounded-lg border border-forest/10 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:shadow-soft sm:grid-cols-[11rem_1fr]"
                   >
                     <div className="relative min-h-40 overflow-hidden rounded-md bg-mint">
                       <Image
-                        src="/images/community-care.jpg"
+                        src={facility.image}
                         alt=""
                         fill
                         sizes="(min-width: 640px) 176px, 100vw"
@@ -202,14 +211,14 @@ export default function Home() {
                         {facility.location}
                       </p>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        <CommunityTabs />
+        <CommunityTabs stories={storyPosts} notices={noticePosts} gallery={galleryPosts} />
 
         <section id="support" className="reveal-section bg-sand py-24 sm:py-28" aria-labelledby="support-title">
           <div className="mx-auto grid max-w-7xl gap-10 px-5 sm:px-6 lg:grid-cols-[1fr_0.82fr] lg:px-8">
@@ -219,8 +228,7 @@ export default function Home() {
                 아이들의 든든한 후원자가 되어주세요
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-8 text-ink/76">
-                후원 안내는 초기에는 계좌와 문의 중심으로 단순하게 시작하고,
-                이후 기부금 영수증, 후원 신청, 운영 보고를 단계적으로 연결합니다.
+                후원 계좌와 문의 방법을 안내합니다.
               </p>
             </div>
             <div className="rounded-lg border border-forest/10 bg-cream p-6 shadow-soft">
@@ -229,20 +237,17 @@ export default function Home() {
               <div className="mt-7 grid gap-3 text-sm text-muted">
                 <p className="flex items-center gap-2">
                   <Phone size={17} className="text-leaf" aria-hidden="true" />
-                  대표 연락처 준비 중
+                  {contact.phone}
                 </p>
                 <p className="flex items-center gap-2">
                   <Mail size={17} className="text-leaf" aria-hidden="true" />
                   {contact.email}
                 </p>
               </div>
-              <Link
-                href="#"
-                className="focus-ring mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-forest px-5 py-3 text-sm font-bold text-white transition hover:bg-leaf"
-              >
+              <SupportPendingDialog className="focus-ring mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-forest px-5 py-3 text-sm font-bold text-white transition hover:bg-leaf">
                 후원 문의하기
                 <ArrowRight size={17} aria-hidden="true" />
-              </Link>
+              </SupportPendingDialog>
             </div>
           </div>
         </section>

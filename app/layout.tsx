@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { Suspense } from "react";
+import { NavigationProgress } from "@/components/navigation-progress";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,7 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
+        {children}
+      </body>
       {process.env.NEXT_PUBLIC_GTM_ID ? (
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       ) : null}

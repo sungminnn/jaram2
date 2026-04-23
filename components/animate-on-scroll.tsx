@@ -6,6 +6,14 @@ export function AnimateOnScroll() {
   useEffect(() => {
     const elements = document.querySelectorAll<HTMLElement>(".reveal-section, .reveal-card");
 
+    elements.forEach((element) => {
+      const rect = element.getBoundingClientRect();
+
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        element.classList.add("is-visible");
+      }
+    });
+
     if (!("IntersectionObserver" in window)) {
       elements.forEach((element) => element.classList.add("is-visible"));
       return;
@@ -16,12 +24,10 @@ export function AnimateOnScroll() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
-          } else {
-            entry.target.classList.remove("is-visible");
           }
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0.01, rootMargin: "0px 0px -4% 0px" },
     );
 
     elements.forEach((element) => observer.observe(element));

@@ -1,24 +1,57 @@
 import Link from "next/link";
-import { Edit3, Search } from "lucide-react";
+import { Edit3, Paperclip } from "lucide-react";
+import { CommunitySearchForm } from "@/components/community-search-form";
 import { CommunityPageLayout } from "@/components/community-page-layout";
-import { communityCategoryMeta, getCommunityPosts, isAdminMock } from "@/content/community";
+import { Pagination } from "@/components/pagination";
+import { communityCategoryMeta, isAdminMock } from "@/content/community";
+import { getCommunityPosts } from "@/lib/community-posts";
 
-export default function NoticesPage() {
-  const posts = getCommunityPosts("notices");
+type NoticesPageProps = {
+  searchParams: Promise<{ page?: string; q?: string }>;
+};
+
+const pageSize = 5;
+
+function pageHref(page: number, query: string) {
+  const params = new URLSearchParams();
+
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+
+  if (query) {
+    params.set("q", query);
+  }
+
+  const search = params.toString();
+  return search ? `/news/notices?${search}` : "/news/notices";
+}
+
+function matchesQuery(post: Awaited<ReturnType<typeof getCommunityPosts>>[number], query: string) {
+  if (!query) {
+    return true;
+  }
+
+  const target = [post.title, post.subtitle, post.author, post.date, ...post.content].filter(Boolean).join(" ").toLowerCase();
+  return target.includes(query.toLowerCase());
+}
+
+export default async function NoticesPage({ searchParams }: NoticesPageProps) {
+  const { page, q } = await searchParams;
+  const posts = await getCommunityPosts("notices");
+  const query = q?.trim() ?? "";
+  const filteredPosts = posts.filter((post) => matchesQuery(post, query));
   const meta = communityCategoryMeta.notices;
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize));
+  const currentPage = Math.min(Math.max(Number(page) || 1, 1), totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const pagedPosts = filteredPosts.slice(startIndex, startIndex + pageSize);
 
   return (
     <CommunityPageLayout title={meta.label} summary={meta.summary} activeHref="/news/notices">
-      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-bold text-leaf">Notice</p>
-          <h2 className="mt-2 text-2xl font-bold text-forest">공지사항</h2>
-        </div>
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex gap-2">
-          <label className="focus-within:ring-2 focus-within:ring-leaf/35 flex min-w-0 items-center gap-2 rounded-md bg-white px-4 py-3 shadow-[0_12px_34px_rgba(47,80,61,0.08)]">
-            <Search size={18} className="text-muted" aria-hidden="true" />
-            <input className="w-44 bg-transparent text-sm outline-none placeholder:text-muted/70" placeholder="검색어 입력" />
-          </label>
+          <CommunitySearchForm action="/news/notices" initialQuery={query} />
           {isAdminMock ? (
             <Link
               href="/news/notices/write"
@@ -31,7 +64,7 @@ export default function NoticesPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg bg-white shadow-[0_18px_55px_rgba(47,80,61,0.08)]">
+      <div className="overflow-hidden rounded-lg border border-forest/10 border-t-2 border-t-leaf/35 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[46rem] border-collapse text-left">
             <thead>
@@ -44,12 +77,14 @@ export default function NoticesPage() {
               </tr>
             </thead>
             <tbody>
-              {posts.map((post, index) => (
+              {pagedPosts.map((post, index) => (
                 <tr key={post.id} className="border-b border-forest/8 last:border-0">
-                  <td className="px-5 py-5 text-sm text-muted">{posts.length - index}</td>
+                  <td className="px-5 py-5 text-sm text-muted">{filteredPosts.length - startIndex - index}</td>
                   <td className="px-5 py-5">
-                    <Link href={`/news/notices/${post.id}`} className="focus-ring rounded-sm text-base font-medium text-forest transition hover:text-leaf">
-                      {post.title}
+                    <Link href={`/news/notices/${post.id}`} className="focus-ring inline-flex max-w-full min-w-0 items-center gap-2 rounded-sm text-base font-medium text-forest transition hover:text-leaf">
+                      <span className="truncate">{post.title}</span>
+                      {post.hasFiles ? <Paperclip size={15} className="shrink-0 text-muted" aria-label="첨부파일 있음" /> : null}
+                      {post.isNew ? <NewBadge /> : null}
                     </Link>
                   </td>
                   <td className="px-5 py-5 text-sm text-muted">{post.date}</td>
@@ -57,25 +92,23 @@ export default function NoticesPage() {
                   <td className="px-5 py-5 text-right text-sm text-muted">{post.views}</td>
                 </tr>
               ))}
+              {!filteredPosts.length ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-14 text-center text-sm font-medium text-muted">
+                    {query ? "검색 결과가 없습니다." : "등록된 게시글이 없습니다."}
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
       </div>
 
-      <div className="mt-8 flex justify-center gap-2" aria-label="페이지 이동">
-        {[1, 2, 3].map((page) => (
-          <button
-            key={page}
-            className={[
-              "size-10 rounded-md text-sm font-bold transition",
-              page === 1 ? "bg-forest text-white" : "bg-white text-muted shadow-[0_8px_24px_rgba(47,80,61,0.06)] hover:text-forest",
-            ].join(" ")}
-            type="button"
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(nextPage) => pageHref(nextPage, query)} />
     </CommunityPageLayout>
   );
+}
+
+function NewBadge() {
+  return <span className="shrink-0 rounded-full bg-leaf px-2 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>;
 }

@@ -10,12 +10,16 @@ type CommunityPageLayoutProps = {
   children: React.ReactNode;
 };
 
-export function CommunityPageLayout({ title, summary, activeHref, children }: CommunityPageLayoutProps) {
+export function CommunityPageLayout({ title, summary: _summary, activeHref, children }: CommunityPageLayoutProps) {
   return (
     <SiteShell>
-      <section className="reveal-section border-b border-forest/10 bg-mint/70">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
-          <nav className="mb-5 flex items-center gap-2 text-sm font-medium text-muted" aria-label="현재 위치">
+      <section className="border-b border-forest/10 bg-mint/60">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-normal text-leaf">Community</p>
+            <h1 className="mt-1 text-2xl font-bold text-forest">{title}</h1>
+          </div>
+          <nav className="flex items-center gap-2 text-sm font-medium text-muted" aria-label="현재 위치">
             <Link href="/" className="transition hover:text-forest">
               홈
             </Link>
@@ -24,13 +28,10 @@ export function CommunityPageLayout({ title, summary, activeHref, children }: Co
             <ChevronRight size={15} aria-hidden="true" />
             <span className="font-bold text-forest">{title}</span>
           </nav>
-          <p className="mb-3 text-sm font-bold text-leaf">Community</p>
-          <h1 className="text-3xl font-bold text-forest sm:text-4xl">{title}</h1>
-          <p className="mt-4 max-w-4xl text-base leading-7 text-muted">{summary}</p>
         </div>
       </section>
 
-      <section className="reveal-section bg-cream py-20 sm:py-24">
+      <section className="reveal-section bg-cream py-12 sm:py-14">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 sm:px-6 lg:grid-cols-[16rem_1fr] lg:px-8">
           <aside className="hidden lg:sticky lg:top-28 lg:block lg:self-start" aria-label="소통공간 하위 메뉴">
             <nav className="border-l border-forest/14 pl-4">

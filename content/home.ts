@@ -4,16 +4,19 @@ import {
   Building,
   Building2,
   CalendarHeart,
-  ClipboardHeart,
   FileText,
   GalleryHorizontalEnd,
   HandHeart,
   HeartHandshake,
+  Images,
   Leaf,
   MapPin,
+  Megaphone,
   MessageCircleQuestion,
+  MessageSquareText,
   Newspaper,
   Network,
+  CircleHelp,
   ShieldCheck,
   Sprout,
   UserRound,
@@ -44,11 +47,11 @@ export const navigation = [
     label: "소통공간",
     href: "/news/notices",
     items: [
-      { label: "공지사항", href: "/news/notices", isNew: true },
-      { label: "뉴스 및 소식", href: "/news/stories", isNew: true },
-      { label: "갤러리", href: "/news/gallery" },
-      { label: "문의게시판", href: "/news/qna" },
-      { label: "자주하는 질문", href: "/news/faq" },
+      { label: "공지사항", href: "/news/notices", icon: Megaphone },
+      { label: "뉴스 및 소식", href: "/news/stories", icon: Newspaper },
+      { label: "갤러리", href: "/news/gallery", icon: Images },
+      { label: "문의게시판", href: "/news/qna", icon: MessageSquareText },
+      { label: "자주하는 질문", href: "/news/faq", icon: CircleHelp },
     ],
   },
   {
@@ -66,7 +69,7 @@ export const navigation = [
     items: [
       { label: "일시/정기후원", href: "/support/donate", icon: CalendarHeart },
       { label: "기타후원", href: "/support/other", icon: HandHeart },
-      { label: "기부금운영보고서", href: "/support/report", icon: ClipboardHeart },
+      { label: "기부금운영보고서", href: "/support/report", icon: FileText },
     ],
   },
 ];
@@ -101,21 +104,27 @@ export const programCards = [
 
 export const facilities = [
   {
+    href: "/facilities/firstier-goun",
     name: "국공립 퍼스티어고운어린이집",
     type: "국공립 어린이집",
-    location: "서울 지역 보육시설",
+    location: "강남구 개포동",
+    image: "/images/community-care.jpg",
     summary: "안전한 일상과 놀이 중심 배움을 함께 설계하는 보육 공간입니다.",
   },
   {
+    href: "/facilities/jagok-care",
     name: "행복자곡다함께키움센터",
     type: "초등 돌봄",
-    location: "자곡동 지역사회",
+    location: "강남구 자곡동",
+    image: "/images/biz-2.jpg",
     summary: "방과 후 아이들이 쉬고 배우며 관계를 넓히는 초등 돌봄 거점입니다.",
   },
   {
+    href: "/facilities/pangyo-forest",
     name: "국공립 판교숲길어린이집",
     type: "국공립 어린이집",
-    location: "판교 숲길 생활권",
+    location: "분당구 대장동",
+    image: "/images/biz-3.jpg",
     summary: "자연과 가까운 환경에서 아이의 호기심과 성장을 돕는 보육 공간입니다.",
   },
 ];
@@ -193,8 +202,9 @@ export const galleryItems = [
 
 export const contact = {
   bank: "하나은행 303-910024-16404 자람",
-  address: "서울특별시",
-  email: "contact@seoul-jaram.com",
+  address: "서울시 강남구 일원로 5길 29",
+  email: "k0421jm@naver.com",
   icon: Sprout,
   mapIcon: MapPin,
+  phone:"02-3411-2555"
 };
