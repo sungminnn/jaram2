@@ -112,6 +112,7 @@ export default async function FacilityPage({ params }: PageProps) {
 
             {heroImage ? (
               <div className="mt-8 overflow-hidden rounded-lg bg-mint/60">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={heroImage} alt="" className="block w-full object-cover" />
               </div>
             ) : null}
@@ -140,6 +141,7 @@ export default async function FacilityPage({ params }: PageProps) {
                   <div className={galleryImages.length === 1 ? "grid gap-5" : "grid gap-5 sm:grid-cols-2"}>
                     {galleryImages.map((image) => (
                       <div key={image} className="overflow-hidden rounded-lg bg-mint/60">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={image} alt="" className="block w-full object-cover" />
                       </div>
                     ))}

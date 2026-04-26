@@ -363,6 +363,7 @@ export function PostFormPlaceholder({
                         ) : null}
                         {isImageFileName(file.name) && file.url ? (
                           <a href={file.url} target="_blank" rel="noreferrer" className="relative size-12 shrink-0 overflow-hidden rounded-md bg-mint">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={file.url} alt="" className="size-full object-cover" />
                           </a>
                         ) : isImageFileName(file.name) ? (
@@ -429,6 +430,7 @@ export function PostFormPlaceholder({
                           ) : null}
                           {file.isImage && file.previewUrl ? (
                             <a href={file.previewUrl} target="_blank" rel="noreferrer" className="relative size-12 shrink-0 overflow-hidden rounded-md bg-mint">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={file.previewUrl} alt="" className="size-full object-cover" />
                             </a>
                           ) : file.isImage ? (

@@ -14,7 +14,6 @@ type AboutPageLayoutProps = {
 export function AboutPageLayout({
   title,
   eyebrow,
-  summary: _summary,
   activeHref,
   children,
 }: AboutPageLayoutProps) {

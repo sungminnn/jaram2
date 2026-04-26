@@ -149,7 +149,12 @@ export function CKEditorField({ name, value, onChange }: CKEditorFieldProps) {
   const editorHostRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<CKEditorInstance | null>(null);
   const initialValueRef = useRef(value);
+  const onChangeRef = useRef(onChange);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     let isMounted = true;
@@ -196,7 +201,7 @@ export function CKEditorField({ name, value, onChange }: CKEditorFieldProps) {
 
         editorRef.current = editor;
         editor.setData(initialValueRef.current);
-        editor.model.document.on("change:data", () => onChange(editor.getData()));
+        editor.model.document.on("change:data", () => onChangeRef.current(editor.getData()));
       })
       .catch(() => setLoadError("에디터를 불러오지 못했습니다. 내용을 일반 입력창에 작성해주세요."));
 

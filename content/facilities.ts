@@ -6,6 +6,8 @@ export const facilityPages = {
     location: "강남구 개포동",
     summary: "안전한 일상과 놀이 중심 배움을 함께 설계하는 보육 공간입니다.",
     headline: "아이의 하루가 반짝이는 따뜻한 공간",
+    image: undefined,
+    galleryImages: [],
     intro: [
       "퍼스티어고운어린이집은 아이들이 편안하게 머물고 즐겁게 배우는 국공립 어린이집입니다.",
       "하루의 흐름 안에서 놀이와 생활, 배움이 자연스럽게 이어지도록 차분하게 살핍니다.",

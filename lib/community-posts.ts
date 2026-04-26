@@ -4,6 +4,7 @@ import type { CommunityPost } from "@/content/community";
 
 type PostRow = Record<string, unknown>;
 type FileRow = Record<string, unknown>;
+type NormalizedFile = NonNullable<CommunityPost["files"]>[number];
 type DbPostPage = "notice" | "notices" | "news" | "stories" | "gallery" | "qna";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -123,7 +124,7 @@ function normalizeFiles(value: unknown): CommunityPost["files"] {
   }
 
   const files = value
-    .map((file) => {
+    .map((file): NormalizedFile | null => {
       if (!file || typeof file !== "object") {
         return null;
       }
@@ -135,14 +136,25 @@ function normalizeFiles(value: unknown): CommunityPost["files"] {
         return null;
       }
 
-      return {
+      const normalizedFile: NormalizedFile = {
         name,
         size: asString(entry.size) ?? "",
-        url: asString(entry.url),
-        storedPath: asString(entry.storedPath),
       };
+
+      const url = asString(entry.url);
+      const storedPath = asString(entry.storedPath);
+
+      if (url) {
+        normalizedFile.url = url;
+      }
+
+      if (storedPath) {
+        normalizedFile.storedPath = storedPath;
+      }
+
+      return normalizedFile;
     })
-    .filter((file): file is { name: string; size: string; url?: string; storedPath?: string } => Boolean(file));
+    .filter((file): file is NormalizedFile => Boolean(file));
 
   return files.length ? files : undefined;
 }
@@ -246,7 +258,7 @@ function resolveAttachmentPath(storedName: string, createdAt: unknown) {
   return folder ? `uploadfile/${folder}/${normalizedName}` : `uploadfile/${normalizedName}`;
 }
 
-function normalizeFileInfo(row: FileRow) {
+function normalizeFileInfo(row: FileRow): NormalizedFile | null {
   const storedName = asString(row.stored_file_name);
   const originalName = asString(row.original_file_name) ?? storedName;
 
@@ -256,13 +268,23 @@ function normalizeFileInfo(row: FileRow) {
 
   const attachmentPath = resolveAttachmentPath(storedName, row.created_at);
 
-  return {
-    id: row.id === undefined || row.id === null ? undefined : String(row.id),
+  const file: NormalizedFile = {
     name: originalName,
     size: formatFileSize(row.file_size),
-    url: storagePublicUrl("attachment", attachmentPath),
     storedPath: `attachment/${attachmentPath}`,
   };
+
+  if (row.id !== undefined && row.id !== null) {
+    file.id = String(row.id);
+  }
+
+  const url = storagePublicUrl("attachment", attachmentPath);
+
+  if (url) {
+    file.url = url;
+  }
+
+  return file;
 }
 
 function sanitizeHtml(value: string) {
@@ -449,7 +471,7 @@ async function getPostFiles(postId: string): Promise<CommunityPost["files"]> {
     const rows = (await response.json()) as FileRow[];
     const files = rows
       .map(normalizeFileInfo)
-      .filter((file): file is { id?: string; name: string; size: string; url?: string; storedPath?: string } => Boolean(file));
+      .filter((file): file is NormalizedFile => Boolean(file));
 
     return files.length ? files : undefined;
   } catch (error) {

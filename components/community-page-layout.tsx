@@ -10,7 +10,7 @@ type CommunityPageLayoutProps = {
   children: React.ReactNode;
 };
 
-export function CommunityPageLayout({ title, summary: _summary, activeHref, children }: CommunityPageLayoutProps) {
+export function CommunityPageLayout({ title, activeHref, children }: CommunityPageLayoutProps) {
   return (
     <SiteShell>
       <section className="border-b border-forest/10 bg-mint/60">

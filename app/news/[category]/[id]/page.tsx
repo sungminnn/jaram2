@@ -94,7 +94,7 @@ export default async function CommunityDetailPage({ params }: PageProps) {
     category === "qna" ||
     currentUser?.role === "admin" ||
     isOwner ||
-    (category !== "qna" && currentUser ? canWritePost(currentUser.role, category) : false);
+    (currentUser ? canWritePost(currentUser.role, category) : false);
   const requireDeletePassword = category === "qna" && currentUser?.role !== "admin";
   const comments =
     category === "qna"
