@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { CommunityPost } from "@/content/community";
 
 type PostRow = Record<string, unknown>;
@@ -5,7 +7,7 @@ type FileRow = Record<string, unknown>;
 type DbPostPage = "notice" | "notices" | "news" | "stories" | "gallery" | "qna";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const categoryToPage = {
   notices: ["notice", "notices"],
   stories: ["news", "stories"],
@@ -137,9 +139,10 @@ function normalizeFiles(value: unknown): CommunityPost["files"] {
         name,
         size: asString(entry.size) ?? "",
         url: asString(entry.url),
+        storedPath: asString(entry.storedPath),
       };
     })
-    .filter((file): file is { name: string; size: string; url?: string } => Boolean(file));
+    .filter((file): file is { name: string; size: string; url?: string; storedPath?: string } => Boolean(file));
 
   return files.length ? files : undefined;
 }
@@ -170,7 +173,7 @@ function resolveStorageUrl(value: string | undefined, defaultBucket: "editor-ima
     return value;
   }
 
-  if (/^https?:\/\//i.test(value) || value.startsWith("/images/")) {
+  if (/^https?:\/\//i.test(value) || value.startsWith("/images/") || value.startsWith("/ckeditor/upload/")) {
     return value;
   }
 
@@ -178,8 +181,10 @@ function resolveStorageUrl(value: string | undefined, defaultBucket: "editor-ima
     return `${supabaseUrl}${value}`;
   }
 
-  if (/^(editor-images|attachment)\//.test(value)) {
-    return `${supabaseUrl}/storage/v1/object/public/${value}`;
+  const bucketPathMatch = value.match(/^(editor-images|attachment)\/(.+)$/);
+
+  if (bucketPathMatch) {
+    return storagePublicUrl(bucketPathMatch[1] as "editor-images" | "attachment", bucketPathMatch[2]);
   }
 
   return storagePublicUrl(defaultBucket, value);
@@ -249,11 +254,25 @@ function normalizeFileInfo(row: FileRow) {
     return null;
   }
 
+  const attachmentPath = resolveAttachmentPath(storedName, row.created_at);
+
   return {
+    id: row.id === undefined || row.id === null ? undefined : String(row.id),
     name: originalName,
     size: formatFileSize(row.file_size),
-    url: storagePublicUrl("attachment", resolveAttachmentPath(storedName, row.created_at)),
+    url: storagePublicUrl("attachment", attachmentPath),
+    storedPath: `attachment/${attachmentPath}`,
   };
+}
+
+function sanitizeHtml(value: string) {
+  return value
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
+    .replace(/\s+on[a-z]+\s*=\s*(['"]).*?\1/gi, "")
+    .replace(/\s+on[a-z]+\s*=\s*[^\s>]+/gi, "")
+    .replace(/\s+(href|src)\s*=\s*(['"])\s*javascript:[\s\S]*?\2/gi, "")
+    .trim();
 }
 
 function normalizePost(row: PostRow, fallbackCategory: CommunityPost["category"]): CommunityPost {
@@ -269,8 +288,10 @@ function normalizePost(row: PostRow, fallbackCategory: CommunityPost["category"]
     author: asString(row.author_name) ?? asString(row.author) ?? asString(row.writer) ?? "관리자",
     date: formatDate(createdAt),
     views: asNumber(row.views) ?? asNumber(row.view_count) ?? 0,
+    isPrivate: row.is_private === true,
     image: resolveStorageUrl(asString(row.main_image_url) ?? asString(row.image) ?? asString(row.image_url) ?? asString(row.thumbnail_url) ?? firstImageSrc(rawContent)),
     content: normalizeContent(rawContent),
+    contentHtml: typeof rawContent === "string" ? sanitizeHtml(rawContent) : undefined,
     files: normalizeFiles(row.files ?? row.attachments),
     hasFiles: normalizeFiles(row.files ?? row.attachments)?.length ? true : undefined,
     isNew: isNewPost(createdAt),
@@ -295,10 +316,12 @@ export async function getCommunityPosts(category: CommunityPost["category"]) {
   }
 
   const url = new URL(`${supabaseUrl}/rest/v1/posts`);
-  url.searchParams.set("select", "id,title,sub_title,content,main_image_url,view_count,page,author_name,created_at,updated_at");
+  url.searchParams.set("select", "id,title,sub_title,content,main_image_url,view_count,page,is_private,author_name,created_at,updated_at");
   url.searchParams.set("page", `in.(${categoryToPage[category].join(",")})`);
   url.searchParams.set("is_deleted", "eq.false");
-  url.searchParams.set("is_private", "eq.false");
+  if (category !== "qna") {
+    url.searchParams.set("is_private", "eq.false");
+  }
   url.searchParams.set("order", "created_at.desc");
 
   try {
@@ -321,11 +344,16 @@ export async function getCommunityPosts(category: CommunityPost["category"]) {
     const posts = rows
       .sort((a, b) => rowTime(b) - rowTime(a))
       .map((row) => normalizePost(row, category));
-    const postIdsWithFiles = await getPostIdsWithFiles(posts.map((post) => post.id));
+    const postIds = posts.map((post) => post.id);
+    const [postIdsWithFiles, commentCounts] = await Promise.all([
+      getPostIdsWithFiles(postIds),
+      category === "qna" ? getPostCommentCounts(postIds) : Promise.resolve(new Map<string, number>()),
+    ]);
 
     return posts.map((post) => ({
       ...post,
       hasFiles: post.hasFiles || postIdsWithFiles.has(post.id) ? true : undefined,
+      commentCount: commentCounts.get(post.id) ?? 0,
     }));
   } catch (error) {
     console.warn(error);
@@ -389,7 +417,7 @@ export async function getCommunityPost(category: CommunityPost["category"], id: 
 
   return {
     ...post,
-    files: await getPostFiles(post.id),
+    files: (await getPostFiles(post.id)) ?? post.files,
   };
 }
 
@@ -419,7 +447,9 @@ async function getPostFiles(postId: string): Promise<CommunityPost["files"]> {
     }
 
     const rows = (await response.json()) as FileRow[];
-    const files = rows.map(normalizeFileInfo).filter((file): file is { name: string; size: string; url?: string } => Boolean(file));
+    const files = rows
+      .map(normalizeFileInfo)
+      .filter((file): file is { id?: string; name: string; size: string; url?: string; storedPath?: string } => Boolean(file));
 
     return files.length ? files : undefined;
   } catch (error) {
@@ -463,6 +493,51 @@ async function getPostIdsWithFiles(postIds: string[]) {
       if (typeof postId === "number" || typeof postId === "string") {
         result.add(String(postId));
       }
+    });
+  } catch (error) {
+    console.warn(error);
+  }
+
+  return result;
+}
+
+async function getPostCommentCounts(postIds: string[]) {
+  const ids = postIds.filter((id) => /^\d+$/.test(id));
+  const result = new Map<string, number>();
+
+  if (!supabaseUrl || !supabaseKey || !ids.length) {
+    return result;
+  }
+
+  const url = new URL(`${supabaseUrl}/rest/v1/comments`);
+  url.searchParams.set("select", "post_id");
+  url.searchParams.set("post_id", `in.(${ids.join(",")})`);
+  url.searchParams.set("is_deleted", "eq.false");
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Accept-Profile": "jaram",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(`Supabase comments count query failed: ${response.status} ${message}`);
+    }
+
+    const rows = (await response.json()) as Array<{ post_id?: number | string | null }>;
+
+    rows.forEach((row) => {
+      if (row.post_id === undefined || row.post_id === null) {
+        return;
+      }
+
+      const postId = String(row.post_id);
+      result.set(postId, (result.get(postId) ?? 0) + 1);
     });
   } catch (error) {
     console.warn(error);

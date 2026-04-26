@@ -1,16 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Download, Eye, Pencil, Trash2, UserRound } from "lucide-react";
+import { cookies } from "next/headers";
+import { ArrowLeft, CalendarDays, Download, Pencil, UserRound } from "lucide-react";
 import { CommunityPageLayout } from "@/components/community-page-layout";
+import { DeletePostDialog } from "@/components/delete-post-dialog";
+import { PostViewCount } from "@/components/post-view-count";
+import { PrivatePostUnlockForm } from "@/components/private-post-unlock-form";
+import { QnaComments } from "@/components/qna-comments";
 import {
   communityCategoryMeta,
   communityPosts,
-  isAdminMock,
   isPostCategory,
   type CommunityPost,
 } from "@/content/community";
 import { getCommunityPost } from "@/lib/community-posts";
+import { canWritePost, getCurrentUser } from "@/lib/server/current-user";
+import { findPostById, listPostComments } from "@/lib/server/supabase-admin";
 
 type PageProps = {
   params: Promise<{ category: string; id: string }>;
@@ -45,6 +50,19 @@ function downloadHref(file: { name: string; url?: string }) {
   }
 }
 
+function readPostAccess(value: string | undefined) {
+  if (!value) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Record<string, number>;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export default async function CommunityDetailPage({ params }: PageProps) {
   const { category, id } = await params;
 
@@ -61,6 +79,39 @@ export default async function CommunityDetailPage({ params }: PageProps) {
   const meta = communityCategoryMeta[category];
   const backHref = categoryHref(category);
   const content = Array.isArray(post.content) ? post.content : [];
+  const currentUser = await getCurrentUser();
+  const dbPost = await findPostById(post.id);
+  const cookieStore = await cookies();
+  const postAccess = readPostAccess(cookieStore.get("jaram_post_access")?.value);
+  const isOwner = Boolean(currentUser && dbPost?.author_id === currentUser.id);
+  const canViewPrivatePost =
+    !post.isPrivate ||
+    category !== "qna" ||
+    currentUser?.role === "admin" ||
+    isOwner ||
+    Boolean(postAccess[post.id]);
+  const canManagePost =
+    category === "qna" ||
+    currentUser?.role === "admin" ||
+    isOwner ||
+    (category !== "qna" && currentUser ? canWritePost(currentUser.role, category) : false);
+  const requireDeletePassword = category === "qna" && currentUser?.role !== "admin";
+  const comments =
+    category === "qna"
+      ? await listPostComments({
+          postId: post.id,
+          viewerId: currentUser?.id,
+          viewerRole: currentUser?.role,
+        }).catch(() => [])
+      : [];
+
+  if (!canViewPrivatePost) {
+    return (
+      <CommunityPageLayout title={meta.label} summary={meta.summary} activeHref={backHref}>
+        <PrivatePostUnlockForm postId={post.id} category={category} />
+      </CommunityPageLayout>
+    );
+  }
 
   return (
     <CommunityPageLayout title={meta.label} summary={meta.summary} activeHref={backHref}>
@@ -81,23 +132,20 @@ export default async function CommunityDetailPage({ params }: PageProps) {
               <CalendarDays size={16} aria-hidden="true" />
               {post.date}
             </span>
-            <span className="inline-flex items-center gap-2">
-              <Eye size={16} aria-hidden="true" />
-              {post.views}
-            </span>
+            <PostViewCount postId={post.id} category={category} initialViews={post.views} />
           </div>
         </div>
 
-        {post.image ? (
-          <a href={post.image} target="_blank" rel="noreferrer" className="focus-ring relative mt-8 block aspect-[16/9] overflow-hidden rounded-lg bg-mint/60">
-            <Image src={post.image} alt="" fill className="object-contain" sizes="(min-width: 1024px) 840px, 100vw" priority />
-          </a>
-        ) : null}
-
-        <div className="mt-8 space-y-5 text-base leading-8 text-forest/82">
-          {content.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
+        <div className="mt-8 text-base leading-8 text-forest/82">
+          {post.contentHtml ? (
+            <div className="ck-content" dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
+          ) : (
+            <div className="space-y-5">
+              {content.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+          )}
           {!content.length && !post.image ? <p>본문 내용이 없습니다.</p> : null}
         </div>
 
@@ -130,19 +178,26 @@ export default async function CommunityDetailPage({ params }: PageProps) {
             <ArrowLeft size={16} aria-hidden="true" />
             목록으로
           </Link>
-          {isAdminMock ? (
+          {canManagePost ? (
             <div className="flex gap-2">
               <Link href={`${backHref}/${post.id}/edit`} className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white">
                 <Pencil size={16} aria-hidden="true" />
                 수정
               </Link>
-              <button type="button" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-3 text-sm font-bold text-muted shadow-[0_8px_24px_rgba(47,80,61,0.08)]">
-                <Trash2 size={16} aria-hidden="true" />
-                삭제
-              </button>
+              <DeletePostDialog postId={post.id} category={category} requirePassword={requireDeletePassword} />
             </div>
           ) : null}
         </div>
+
+        {category === "qna" ? (
+          <QnaComments
+            postId={post.id}
+            category={category}
+            comments={comments}
+            canWrite={Boolean(currentUser)}
+            currentUserName={currentUser ? `${currentUser.name}님` : undefined}
+          />
+        ) : null}
       </div>
     </CommunityPageLayout>
   );

@@ -63,6 +63,9 @@ export function NavigationProgress() {
       }
 
       if (isCurrentUrlLink(url)) {
+        event.preventDefault();
+        setIsNavigating(true);
+        window.location.reload();
         return;
       }
 

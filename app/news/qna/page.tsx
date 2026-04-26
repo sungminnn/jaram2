@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Edit3, Paperclip } from "lucide-react";
+import { Edit3, LockKeyhole, Paperclip } from "lucide-react";
 import { CommunitySearchForm } from "@/components/community-search-form";
 import { CommunityPageLayout } from "@/components/community-page-layout";
 import { Pagination } from "@/components/pagination";
-import { communityCategoryMeta, isAdminMock } from "@/content/community";
+import { communityCategoryMeta } from "@/content/community";
 import { getCommunityPosts } from "@/lib/community-posts";
 
 type QnaPageProps = {
@@ -32,7 +32,16 @@ function matchesQuery(post: Awaited<ReturnType<typeof getCommunityPosts>>[number
     return true;
   }
 
-  const target = [post.title, post.subtitle, post.author, post.date, ...post.content].filter(Boolean).join(" ").toLowerCase();
+  const target = [
+    post.isPrivate ? "비밀글입니다" : post.title,
+    post.isPrivate ? undefined : post.subtitle,
+    post.author,
+    post.date,
+    ...(post.isPrivate ? [] : post.content),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
   return target.includes(query.toLowerCase());
 }
 
@@ -52,15 +61,13 @@ export default async function QnaPage({ searchParams }: QnaPageProps) {
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex gap-2">
           <CommunitySearchForm action="/news/qna" initialQuery={query} />
-          {isAdminMock ? (
-            <Link
-              href="/news/qna/write"
-              className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf"
-            >
-              <Edit3 size={16} aria-hidden="true" />
-              글쓰기
-            </Link>
-          ) : null}
+          <Link
+            href="/news/qna/write"
+            className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf"
+          >
+            <Edit3 size={16} aria-hidden="true" />
+            글쓰기
+          </Link>
         </div>
       </div>
 
@@ -82,7 +89,11 @@ export default async function QnaPage({ searchParams }: QnaPageProps) {
                   <td className="px-5 py-5 text-sm text-muted">{filteredPosts.length - startIndex - index}</td>
                   <td className="px-5 py-5">
                     <Link href={`/news/qna/${post.id}`} className="focus-ring inline-flex max-w-full min-w-0 items-center gap-2 rounded-sm text-base font-medium text-forest transition hover:text-leaf">
-                      <span className="truncate">{post.title}</span>
+                      {post.isPrivate ? <LockKeyhole size={15} className="shrink-0 text-muted" aria-label="비밀글" /> : null}
+                      <span className="truncate">{post.isPrivate ? "비밀글입니다." : post.title}</span>
+                      {post.commentCount ? (
+                        <span className="shrink-0 text-sm font-bold text-leaf">[{post.commentCount}]</span>
+                      ) : null}
                       {post.hasFiles ? <Paperclip size={15} className="shrink-0 text-muted" aria-label="첨부파일 있음" /> : null}
                       {post.isNew ? <NewBadge /> : null}
                     </Link>

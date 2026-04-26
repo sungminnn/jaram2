@@ -3,8 +3,9 @@ import Link from "next/link";
 import { ArrowRight, Edit3 } from "lucide-react";
 import { CommunityPageLayout } from "@/components/community-page-layout";
 import { Pagination } from "@/components/pagination";
-import { communityCategoryMeta, isAdminMock } from "@/content/community";
+import { communityCategoryMeta } from "@/content/community";
 import { getCommunityPosts } from "@/lib/community-posts";
+import { canWritePost, getCurrentUser } from "@/lib/server/current-user";
 
 type StoriesPageProps = {
   searchParams: Promise<{ page?: string }>;
@@ -24,11 +25,13 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
   const currentPage = Math.min(Math.max(Number(page) || 1, 1), totalPages);
   const startIndex = (currentPage - 1) * pageSize;
   const pagedPosts = posts.slice(startIndex, startIndex + pageSize);
+  const currentUser = await getCurrentUser();
+  const canWrite = currentUser ? canWritePost(currentUser.role, "stories") : false;
 
   return (
     <CommunityPageLayout title={meta.label} summary={meta.summary} activeHref="/news/stories">
       <div className="mb-8 flex items-end justify-end gap-4">
-        {isAdminMock ? (
+        {canWrite ? (
           <Link href="/news/stories/write" className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf">
             <Edit3 size={16} aria-hidden="true" />
             글쓰기

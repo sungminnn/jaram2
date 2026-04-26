@@ -3,8 +3,9 @@ import { Edit3, Paperclip } from "lucide-react";
 import { CommunitySearchForm } from "@/components/community-search-form";
 import { CommunityPageLayout } from "@/components/community-page-layout";
 import { Pagination } from "@/components/pagination";
-import { communityCategoryMeta, isAdminMock } from "@/content/community";
+import { communityCategoryMeta } from "@/content/community";
 import { getCommunityPosts } from "@/lib/community-posts";
+import { canWritePost, getCurrentUser } from "@/lib/server/current-user";
 
 type NoticesPageProps = {
   searchParams: Promise<{ page?: string; q?: string }>;
@@ -46,13 +47,15 @@ export default async function NoticesPage({ searchParams }: NoticesPageProps) {
   const currentPage = Math.min(Math.max(Number(page) || 1, 1), totalPages);
   const startIndex = (currentPage - 1) * pageSize;
   const pagedPosts = filteredPosts.slice(startIndex, startIndex + pageSize);
+  const currentUser = await getCurrentUser();
+  const canWrite = currentUser ? canWritePost(currentUser.role, "notices") : false;
 
   return (
     <CommunityPageLayout title={meta.label} summary={meta.summary} activeHref="/news/notices">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex gap-2">
           <CommunitySearchForm action="/news/notices" initialQuery={query} />
-          {isAdminMock ? (
+          {canWrite ? (
             <Link
               href="/news/notices/write"
               className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf"

@@ -168,13 +168,15 @@ create index if not exists idx_file_info_post_id on jaram.file_info(post_id);
 --   - legacy_users: 프론트 직접 접근 금지
 -- =========================================================
 
-grant usage on schema jaram to anon, authenticated;
+grant usage on schema jaram to anon, authenticated, service_role;
 
 revoke all on jaram.posts from anon, authenticated;
 grant select on jaram.posts to anon, authenticated;
+grant select, insert, update, delete on jaram.posts to service_role;
 
 revoke all on jaram.file_info from anon, authenticated;
 grant select on jaram.file_info to anon, authenticated;
+grant select, insert, update, delete on jaram.file_info to service_role;
 
 -- legacy_users 는 프론트 직접 접근 금지 권장
 revoke all on jaram.legacy_users from anon, authenticated;

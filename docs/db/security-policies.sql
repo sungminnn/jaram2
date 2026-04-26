@@ -16,13 +16,15 @@
 -- legacy_users는 절대 Data API 노출 대상에 포함하지 않는다.
 
 -- 2. 최소 권한 GRANT
-grant usage on schema jaram to anon, authenticated;
+grant usage on schema jaram to anon, authenticated, service_role;
 
 revoke all on jaram.posts from anon, authenticated;
 grant select on jaram.posts to anon, authenticated;
+grant select, insert, update, delete on jaram.posts to service_role;
 
 revoke all on jaram.file_info from anon, authenticated;
 grant select on jaram.file_info to anon, authenticated;
+grant select, insert, update, delete on jaram.file_info to service_role;
 revoke all on jaram.legacy_users from anon, authenticated;
 
 -- 3. RLS 활성화

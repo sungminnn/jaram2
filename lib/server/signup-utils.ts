@@ -52,7 +52,12 @@ export function isValidPhone(phone: string) {
 }
 
 export function isValidPassword(password: string) {
-  return password.length >= 8 && password.length <= 72;
+  return (
+    password.length >= 8 &&
+    password.length <= 72 &&
+    /\d/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  );
 }
 
 export function createVerificationCode() {
@@ -115,7 +120,7 @@ export function validateSignupPayload(payload: SignupPayload) {
   }
 
   if (!isValidPassword(payload.password)) {
-    return "비밀번호는 8자 이상으로 입력해주세요.";
+    return "비밀번호는 숫자와 특수문자를 포함해 8자 이상으로 입력해주세요.";
   }
 
   if (payload.password !== payload.confirmPassword) {

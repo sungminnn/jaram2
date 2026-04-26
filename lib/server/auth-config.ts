@@ -10,10 +10,41 @@ function getRequiredEnv(name: string) {
   return value;
 }
 
+function getServiceRoleKey() {
+  const value = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (value.startsWith("sb_publishable_") || value.startsWith("sb_pub")) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY에 publishable/anon key가 설정되어 있습니다. Supabase Dashboard의 service_role 또는 secret key를 설정해주세요.",
+    );
+  }
+
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY에 URL이 설정되어 있습니다. Supabase Dashboard의 service_role 또는 secret key를 설정해주세요.",
+    );
+  }
+
+  return value;
+}
+
+function getPublishableKey() {
+  const value = getRequiredEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY에 URL이 설정되어 있습니다. Supabase Dashboard의 publishable key를 설정해주세요.",
+    );
+  }
+
+  return value;
+}
+
 export function getSupabaseConfig() {
   return {
     url: getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    serviceRoleKey: getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    publishableKey: getPublishableKey(),
+    serviceRoleKey: getServiceRoleKey(),
     schema: "jaram",
   };
 }

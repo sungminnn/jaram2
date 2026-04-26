@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, MailCheck, ShieldCheck, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, CheckCircle2, Eye, EyeOff, MailCheck, ShieldCheck, X } from "lucide-react";
 import { signupPolicies } from "@/content/signup";
 
 type FormState = {
@@ -47,6 +48,7 @@ function normalizePhoneInput(value: string) {
 }
 
 export function SignupForm() {
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(initialState);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,8 @@ export function SignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (!expiresAt || isEmailVerified) {
@@ -242,6 +246,7 @@ export function SignupForm() {
       setExpiresAt(null);
       setRemainingSeconds(null);
       setMessage(data.message ?? "회원가입이 완료되었습니다.");
+      router.push("/");
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -336,12 +341,16 @@ export function SignupForm() {
                 disabled={isSendingCode || !form.email || isCodeSent}
                 className="focus-ring rounded-2xl bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
               >
-                {isSendingCode ? "발송 중..." : "인증번호 발송"}
+                {isEmailVerified
+                  ? "인증완료"
+                  : isSendingCode
+                    ? "발송 중..."
+                    : "인증번호 발송"}
               </button>
             </div>
           </label>
 
-          {isCodeSent ? (
+          {isCodeSent && !isEmailVerified ? (
             <div className="grid gap-3 rounded-2xl border border-leaf/15 bg-mint/60 p-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-forest">
@@ -373,7 +382,7 @@ export function SignupForm() {
                       code: event.target.value.replace(/\D/g, "").slice(0, 6),
                     }))
                   }
-                  className="rounded-2xl border border-forest/12 bg-white px-4 py-3 text-base font-medium tracking-[0.28em] text-ink outline-none transition focus:border-leaf"
+                  className="rounded-2xl border border-forest/12 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
                   placeholder="인증번호 6자리"
                   inputMode="numeric"
                   disabled={isEmailVerified}
@@ -436,33 +445,61 @@ export function SignupForm() {
 
         <label className="grid gap-2 text-sm font-semibold text-forest">
           비밀번호
-          <input
-            required
-            type="password"
-            value={form.password}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, password: event.target.value }))
-            }
-            className="rounded-2xl border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
-            placeholder="8자 이상 입력"
-          />
+          <div className="relative">
+            <input
+              required
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, password: event.target.value }))
+              }
+              className="w-full rounded-2xl border border-forest/12 bg-cream px-4 py-3 pr-12 text-base font-medium text-ink outline-none transition focus:border-leaf"
+              placeholder="숫자, 특수문자 포함 8자 이상"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              className="focus-ring absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted transition hover:text-forest"
+              aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+            >
+              {showPassword ? (
+                <EyeOff className="size-4" aria-hidden="true" />
+              ) : (
+                <Eye className="size-4" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </label>
 
         <label className="grid gap-2 text-sm font-semibold text-forest">
           비밀번호 확인
-          <input
-            required
-            type="password"
-            value={form.confirmPassword}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                confirmPassword: event.target.value,
-              }))
-            }
-            className="rounded-2xl border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
-            placeholder="비밀번호를 다시 입력"
-          />
+          <div className="relative">
+            <input
+              required
+              type={showConfirmPassword ? "text" : "password"}
+              value={form.confirmPassword}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  confirmPassword: event.target.value,
+                }))
+              }
+              className="w-full rounded-2xl border border-forest/12 bg-cream px-4 py-3 pr-12 text-base font-medium text-ink outline-none transition focus:border-leaf"
+              placeholder="비밀번호를 다시 입력"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((current) => !current)}
+              className="focus-ring absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted transition hover:text-forest"
+              aria-label={showConfirmPassword ? "비밀번호 확인 숨기기" : "비밀번호 확인 보기"}
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="size-4" aria-hidden="true" />
+              ) : (
+                <Eye className="size-4" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </label>
         </div>
 

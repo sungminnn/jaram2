@@ -180,6 +180,52 @@ select {
   transition-delay: 0.24s;
 }
 
+.ck-powered-by-balloon {
+  display: none !important;
+}
+
+.ck-editor__editable {
+  min-height: 300px;
+  line-height: 1.7;
+}
+
+.ck-editor__editable p,
+.ck-content p {
+  margin: 0;
+}
+
+.ck-content {
+  line-height: 1.8;
+}
+
+.ck-content figure {
+  margin: 0;
+}
+
+.ck-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ck-content .table {
+  overflow-x: auto;
+}
+
+.ck-content .table table {
+  border: 1px double #b3b3b3;
+  border-collapse: collapse;
+  border-spacing: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.ck-content .table table td,
+.ck-content .table table th {
+  border: 1px solid #bfbfbf;
+  min-width: 2em;
+  padding: 0.4em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

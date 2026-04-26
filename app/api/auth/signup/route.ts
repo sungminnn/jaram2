@@ -3,9 +3,9 @@ import type { SignupPayload } from "@/lib/server/signup-utils";
 import { validateSignupPayload } from "@/lib/server/signup-utils";
 import {
   assertVerifiedSignupEmail,
+  assertSignupEmailAvailable,
   createAuthUser,
   deleteAuthUser,
-  findProfileByEmail,
   insertProfile,
   updateVerification,
 } from "@/lib/server/supabase-admin";
@@ -21,14 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: validationMessage }, { status: 400 });
     }
 
-    const existingProfile = await findProfileByEmail(payload.email);
-
-    if (existingProfile) {
-      return NextResponse.json(
-        { message: "이미 가입된 이메일입니다." },
-        { status: 409 },
-      );
-    }
+    await assertSignupEmailAvailable(payload.email);
 
     const verification = await assertVerifiedSignupEmail(payload.email);
     const createdUser = await createAuthUser(payload);
@@ -57,7 +50,8 @@ export async function POST(request: Request) {
 
     const message =
       error instanceof Error ? error.message : "회원가입 처리 중 오류가 발생했습니다.";
+    const status = message === "이미 가입된 이메일 계정입니다." ? 409 : 500;
 
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json({ message }, { status });
   }
 }

@@ -11,7 +11,7 @@ import {
   normalizeEmail,
 } from "@/lib/server/signup-utils";
 import {
-  findProfileByEmail,
+  assertSignupEmailAvailable,
   getLatestVerification,
   insertVerification,
 } from "@/lib/server/supabase-admin";
@@ -30,14 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingProfile = await findProfileByEmail(normalizedEmail);
-
-    if (existingProfile) {
-      return NextResponse.json(
-        { message: "이미 가입된 이메일입니다." },
-        { status: 409 },
-      );
-    }
+    await assertSignupEmailAvailable(normalizedEmail);
 
     const latest = await getLatestVerification(normalizedEmail);
 
@@ -102,7 +95,8 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "인증번호 발송 중 오류가 발생했습니다.";
+    const status = message === "이미 가입된 이메일 계정입니다." ? 409 : 500;
 
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json({ message }, { status });
   }
 }

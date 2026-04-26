@@ -25,9 +25,39 @@ create table if not exists jaram.email_verifications (
 create index if not exists idx_email_verifications_email_purpose_created_at
   on jaram.email_verifications (email, purpose, created_at desc);
 
-grant usage on schema jaram to anon, authenticated;
+grant usage on schema jaram to anon, authenticated, service_role;
 
 revoke all on jaram.email_verifications from anon, authenticated;
+grant select, insert, update, delete
+on jaram.email_verifications
+to service_role;
+
+do $$
+begin
+  if to_regclass('jaram.profiles') is not null then
+    alter table jaram.profiles
+    add column if not exists role text not null default 'user';
+
+    if not exists (
+      select 1
+      from pg_constraint
+      where conname = 'profiles_role_check'
+        and conrelid = 'jaram.profiles'::regclass
+    ) then
+      alter table jaram.profiles
+      add constraint profiles_role_check
+      check (role in ('user', 'admin'))
+      not valid;
+
+      alter table jaram.profiles
+      validate constraint profiles_role_check;
+    end if;
+
+    grant select, insert, update, delete
+    on jaram.profiles
+    to service_role;
+  end if;
+end $$;
 
 alter table jaram.email_verifications enable row level security;
 alter table jaram.email_verifications force row level security;

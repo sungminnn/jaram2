@@ -12,8 +12,11 @@ export type CommunityPost = {
   views: number;
   image?: string;
   content: string[];
-  files?: { name: string; size: string; url?: string }[];
+  contentHtml?: string;
+  files?: { id?: string; name: string; size: string; url?: string; storedPath?: string }[];
   hasFiles?: boolean;
+  commentCount?: number;
+  isPrivate?: boolean;
   isNew?: boolean;
 };
 
@@ -227,16 +230,12 @@ export const communityPosts: CommunityPost[] = [
 export const faqItems = [
   {
     question: "후원은 어떻게 신청하나요?",
-    answer: "후원 페이지에서 일시후원과 정기후원 안내를 확인하실 수 있습니다. 결제 연동은 추후 적용 예정입니다.",
+    answer: "후원 신청과 운영 보고 페이지는 순차적으로 연결할 예정입니다. 지금은 계좌 안내와 문의로 도와드리고 있습니다.",
   },
   {
     question: "문의게시판은 누가 이용할 수 있나요?",
-    answer: "회원 기능 전환 후 로그인 사용자 기준으로 문의 작성 기능을 제공할 예정입니다.",
-  },
-  {
-    question: "공지, 뉴스, 갤러리 글쓰기는 누가 할 수 있나요?",
-    answer: "운영자 권한을 가진 관리자만 작성할 수 있도록 인증과 권한 검사를 분리해 구현할 예정입니다.",
-  },
+    answer: "회원/비회원 누구나 이용할 수 있습니다.",
+  }
 ];
 
 export function getCommunityPosts(category: CommunityPost["category"]) {

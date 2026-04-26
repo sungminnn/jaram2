@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ChevronRight, LogIn, Menu, Sprout, UserPlus } from "lucide-react";
 import { navigation } from "@/content/home";
+import { LogoutButton } from "@/components/logout-button";
 import { SupportPendingDialog } from "@/components/support-pending-dialog";
 import type { CommunityPost } from "@/content/community";
 import { getRecentCommunityCategories } from "@/lib/community-posts";
+import { getCurrentUser } from "@/lib/server/current-user";
 
 function hrefCategory(href: string): CommunityPost["category"] | undefined {
   if (href.startsWith("/news/notices")) {
@@ -26,7 +28,10 @@ function hrefCategory(href: string): CommunityPost["category"] | undefined {
 }
 
 export async function SiteHeader() {
-  const recentCategories = await getRecentCommunityCategories();
+  const [recentCategories, currentUser] = await Promise.all([
+    getRecentCommunityCategories(),
+    getCurrentUser(),
+  ]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-forest/10 bg-cream/90 backdrop-blur-xl">
@@ -122,22 +127,37 @@ export async function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <Link
-            href="/login"
-            className="focus-ring inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-base font-bold text-forest/78 transition hover:bg-mint hover:text-forest"
-          >
-            <LogIn size={19} aria-hidden="true" />
-            로그인
-          </Link>
-          <Link
-            href="/signup"
-            className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-5 py-3 text-base font-bold text-white transition hover:bg-leaf"
-          >
-            <UserPlus size={19} aria-hidden="true" />
-            회원가입
-          </Link>
-        </div>
+        {currentUser ? (
+          <div className="hidden items-center gap-3 lg:flex">
+            <span className="max-w-44 truncate text-sm font-bold text-forest">
+              {currentUser.name}님 환영합니다.
+            </span>
+            {currentUser.role === "admin" ? (
+              <span className="rounded-full bg-leaf px-2.5 py-1 text-xs font-bold text-white">관리자</span>
+            ) : null}
+            <LogoutButton
+              iconSize={19}
+              className="focus-ring inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-base font-bold text-forest/78 transition hover:bg-mint hover:text-forest"
+            />
+          </div>
+        ) : (
+          <div className="hidden items-center gap-2 lg:flex">
+            <Link
+              href="/login"
+              className="focus-ring inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-base font-bold text-forest/78 transition hover:bg-mint hover:text-forest"
+            >
+              <LogIn size={19} aria-hidden="true" />
+              로그인
+            </Link>
+            <Link
+              href="/signup"
+              className="focus-ring inline-flex items-center gap-2 rounded-md bg-forest px-5 py-3 text-base font-bold text-white transition hover:bg-leaf"
+            >
+              <UserPlus size={19} aria-hidden="true" />
+              회원가입
+            </Link>
+          </div>
+        )}
 
         <details className="group relative lg:hidden">
           <summary
@@ -150,20 +170,34 @@ export async function SiteHeader() {
             className="absolute right-0 mt-3 max-h-[calc(100svh-6rem)] w-72 overflow-auto rounded-lg border border-forest/10 bg-cream p-2 shadow-soft"
             aria-label="모바일 메뉴"
           >
-            <Link
-              href="/login"
-              className="focus-ring mb-1 flex items-center gap-2 rounded-md px-4 py-3 text-sm font-bold text-forest transition hover:bg-mint"
-            >
-              <LogIn size={17} aria-hidden="true" />
-              로그인
-            </Link>
-            <Link
-              href="/signup"
-              className="focus-ring mb-3 flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white"
-            >
-              <UserPlus size={17} aria-hidden="true" />
-              회원가입
-            </Link>
+            {currentUser ? (
+              <div className="mb-3 grid gap-2 rounded-md bg-white p-3">
+                <span className="text-sm font-bold text-forest">{currentUser.name}님 환영합니다.</span>
+                {currentUser.role === "admin" ? (
+                  <span className="w-fit rounded-full bg-leaf px-2.5 py-1 text-xs font-bold text-white">관리자</span>
+                ) : null}
+                <LogoutButton
+                  className="focus-ring flex items-center gap-2 rounded-md px-1 py-2 text-sm font-bold text-forest transition hover:bg-mint"
+                />
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="focus-ring mb-1 flex items-center gap-2 rounded-md px-4 py-3 text-sm font-bold text-forest transition hover:bg-mint"
+                >
+                  <LogIn size={17} aria-hidden="true" />
+                  로그인
+                </Link>
+                <Link
+                  href="/signup"
+                  className="focus-ring mb-3 flex items-center gap-2 rounded-md bg-forest px-4 py-3 text-sm font-bold text-white"
+                >
+                  <UserPlus size={17} aria-hidden="true" />
+                  회원가입
+                </Link>
+              </>
+            )}
             {navigation.map((item) => (
               <div key={item.href} className="border-t border-forest/10 py-2">
                 <Link
