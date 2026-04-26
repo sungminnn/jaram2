@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { SignupPayload } from "@/lib/server/signup-utils";
 import { validateSignupPayload } from "@/lib/server/signup-utils";
-import {
+import { 
   assertVerifiedSignupEmail,
   assertSignupEmailAvailable,
   createAuthUser,
