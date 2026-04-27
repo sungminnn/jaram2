@@ -105,7 +105,7 @@ export default async function Home() {
 
           <div className="relative mx-auto flex min-h-[31rem] max-w-7xl items-center px-5 py-20 sm:px-6 lg:min-h-[34rem] lg:px-8">
             <div className="max-w-2xl">
-              <p className="mb-5 inline-flex items-center gap-2 rounded-md bg-white/14 px-4 py-2 text-base font-bold text-white ring-1 ring-white/24 backdrop-blur">
+              <p className="mb-5 inline-flex items-center gap-2 text-base font-bold text-white">
                 <contact.icon size={18} aria-hidden="true" />
                 비영리민간단체 자람
               </p>
