@@ -17,7 +17,7 @@ export default function SignupPage() {
           <SignupForm />
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter /> 
     </>
   );
 }
