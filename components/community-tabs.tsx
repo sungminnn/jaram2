@@ -202,7 +202,6 @@ function EmptyState() {
 function SectionHeading({ children }: { children: ReactNode }) {
   return (
     <div>
-      <span className="mb-3 block h-0.5 w-10 rounded-full bg-leaf" aria-hidden="true" />
       <h3 className="text-xl font-bold text-forest">{children}</h3>
     </div>
   );

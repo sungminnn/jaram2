@@ -64,7 +64,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="grid gap-6 rounded-[2rem] border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
+    <div className="grid gap-6 rounded-lg border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-2xl border border-[#f2b1a8] bg-[#fff4f1] px-4 py-3 text-sm font-semibold text-[#a13a29]">
           <span>{error}</span>
@@ -89,7 +89,7 @@ export function ResetPasswordForm() {
       </div>
 
       {!accessToken && !isComplete ? (
-        <div className="rounded-2xl border border-amber/35 bg-cream px-4 py-3 text-sm font-semibold text-forest">
+        <div className="rounded-lg border border-amber/35 bg-cream px-4 py-3 text-sm font-semibold text-forest">
           재설정 링크가 올바르지 않거나 만료되었습니다. 로그인 페이지에서 다시 요청해주세요.
         </div>
       ) : null}
@@ -97,7 +97,7 @@ export function ResetPasswordForm() {
       {isComplete ? (
         <Link
           href="/login"
-          className="focus-ring rounded-2xl bg-forest px-6 py-4 text-center text-base font-bold text-white transition hover:bg-leaf"
+          className="focus-ring rounded-lg bg-forest px-6 py-4 text-center text-base font-bold text-white transition hover:bg-leaf"
         >
           로그인 페이지로 돌아가기
         </Link>
@@ -160,7 +160,7 @@ export function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isSubmitting || !accessToken}
-            className="focus-ring mt-2 rounded-2xl bg-forest px-6 py-4 text-base font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
+            className="focus-ring mt-2 rounded-lg bg-forest px-6 py-4 text-base font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
           >
             {isSubmitting ? "변경 중..." : "비밀번호 변경"}
           </button>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -23,6 +24,24 @@ import {
   quickLinks,
 } from "@/content/home";
 import { getCommunityPosts } from "@/lib/community-posts";
+import { getSiteUrl, siteConfig } from "@/lib/site-config";
+
+const siteUrl = getSiteUrl();
+
+export const metadata: Metadata = {
+  title: {
+    absolute: siteConfig.name,
+  },
+  description: siteConfig.description,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: siteConfig.name,
+    description: siteConfig.slogan,
+    url: "/",
+  },
+};
 
 const aboutValues = [
   { label: "안전한 돌봄", icon: ShieldCheck },
@@ -36,9 +55,32 @@ export default async function Home() {
     getCommunityPosts("notices"),
     getCommunityPosts("gallery"),
   ]);
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "@id": `${siteUrl}/#organization`,
+    name: siteConfig.name,
+    alternateName: siteConfig.shortName,
+    url: siteUrl,
+    description: siteConfig.description,
+    slogan: siteConfig.slogan,
+    areaServed: "KR-11",
+    telephone: siteConfig.contact.telephone,
+    email: siteConfig.contact.email,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "KR",
+      addressLocality: siteConfig.contact.addressLocality,
+      streetAddress: siteConfig.contact.streetAddress,
+    },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <AnimateOnScroll />
       <SiteHeader />
       <main id="top">
@@ -71,14 +113,14 @@ export default async function Home() {
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="#about"
-                  className="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-white px-6 py-3.5 text-sm font-bold text-forest transition hover:bg-mint"
+                  className="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-white px-6 py-3.5 text-sm font-bold text-forest shadow-[0_12px_30px_rgba(31,42,36,0.16)] transition duration-200 hover:-translate-y-0.5 hover:bg-mint hover:shadow-[0_16px_36px_rgba(31,42,36,0.22)]"
                 >
                   자람 소개 보기
                   <ArrowRight size={18} aria-hidden="true" />
                 </Link>
                 <Link
                   href="#facilities"
-                  className="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/36 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/18"
+                  className="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/36 bg-white/10 px-6 py-3.5 text-sm font-bold text-white shadow-[0_12px_30px_rgba(31,42,36,0.12)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/22 hover:shadow-[0_16px_36px_rgba(31,42,36,0.18)]"
                 >
                   운영 시설 보기
                 </Link>
@@ -126,7 +168,7 @@ export default async function Home() {
               </p>
               <div className="grid gap-4 sm:grid-cols-3">
                 {aboutValues.map((item) => (
-                  <div key={item.label} className="reveal-card rounded-lg border border-forest/10 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:shadow-soft">
+                  <div key={item.label} className="rounded-lg border border-forest/10 bg-white p-5">
                     <item.icon className="mb-4 text-leaf" size={25} aria-hidden="true" />
                     <p className="font-bold text-forest">{item.label}</p>
                   </div>

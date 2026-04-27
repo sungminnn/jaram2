@@ -33,6 +33,18 @@ const initialState: FormState = {
   emailAgree: false,
 };
 
+function agreementCardClass(checked: boolean, disabled = false) {
+  if (disabled) {
+    return "border-forest/10 bg-white/70 text-muted";
+  }
+
+  if (checked) {
+    return "border-leaf bg-mint/45 shadow-[inset_0_0_0_1px_rgba(70,132,75,0.18)]";
+  }
+
+  return "border-forest/10 bg-cream";
+}
+
 function normalizePhoneInput(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
 
@@ -261,6 +273,12 @@ export function SignupForm() {
   const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
   const remainingMinutes = remainingSeconds !== null ? Math.floor(remainingSeconds / 60) : 0;
   const remainingDisplaySeconds = remainingSeconds !== null ? remainingSeconds % 60 : 0;
+  const allAccepted =
+    form.privacyAccepted &&
+    form.termsAccepted &&
+    form.marketingAccepted &&
+    form.smsAgree &&
+    form.emailAgree;
 
   return (
     <>
@@ -297,7 +315,7 @@ export function SignupForm() {
       ) : null}
 
       <form onSubmit={onSubmit} className="grid gap-6">
-        <div className="grid gap-6 rounded-[2rem] border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
+        <div className="grid gap-6 rounded-lg border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
         <div className="grid gap-2">
           <p className="text-sm font-bold tracking-[0.18em] text-leaf">SIGN UP</p>
           <h2 className="text-3xl font-bold text-forest sm:text-4xl">회원가입</h2>
@@ -314,7 +332,7 @@ export function SignupForm() {
             onChange={(event) =>
               setForm((current) => ({ ...current, userName: event.target.value }))
             }
-            className="rounded-2xl border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
+            className="rounded-lg border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
             placeholder="홍길동"
           />
         </label>
@@ -331,7 +349,7 @@ export function SignupForm() {
                   const nextEmail = event.target.value;
                   resetEmailVerification(nextEmail);
                 }}
-                className="rounded-2xl border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
+                className="rounded-lg border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
                 placeholder="gildong@email.com"
                 disabled={isCodeSent}
               />
@@ -339,7 +357,7 @@ export function SignupForm() {
                 type="button"
                 onClick={sendCode}
                 disabled={isSendingCode || !form.email || isCodeSent}
-                className="focus-ring rounded-2xl bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
+                className="focus-ring rounded-lg bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
               >
                 {isEmailVerified
                   ? "인증완료"
@@ -351,7 +369,7 @@ export function SignupForm() {
           </label>
 
           {isCodeSent && !isEmailVerified ? (
-            <div className="grid gap-3 rounded-2xl border border-leaf/15 bg-mint/60 p-4">
+            <div className="grid gap-3 rounded-lg border border-leaf/15 bg-mint/60 p-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-forest">
                   인증번호를 발송했습니다. 메일을 확인한 뒤 아래에 입력해주세요.
@@ -382,7 +400,7 @@ export function SignupForm() {
                       code: event.target.value.replace(/\D/g, "").slice(0, 6),
                     }))
                   }
-                  className="rounded-2xl border border-forest/12 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
+                  className="rounded-lg border border-forest/12 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
                   placeholder="인증번호 6자리"
                   inputMode="numeric"
                   disabled={isEmailVerified}
@@ -393,7 +411,7 @@ export function SignupForm() {
                   disabled={
                     isVerifyingCode || form.code.length !== 6 || isEmailVerified || isExpired
                   }
-                  className="focus-ring rounded-2xl border border-leaf/22 bg-white px-4 py-3 text-sm font-bold text-forest transition hover:border-leaf hover:bg-mint disabled:cursor-not-allowed disabled:border-forest/10 disabled:bg-cream disabled:text-muted"
+                  className="focus-ring rounded-lg border border-leaf/22 bg-white px-4 py-3 text-sm font-bold text-forest transition hover:border-leaf hover:bg-mint disabled:cursor-not-allowed disabled:border-forest/10 disabled:bg-cream disabled:text-muted"
                 >
                   {isVerifyingCode ? "확인 중..." : isEmailVerified ? "인증 완료" : "인증 확인"}
                 </button>
@@ -437,7 +455,7 @@ export function SignupForm() {
                 phone: normalizePhoneInput(event.target.value),
               }))
             }
-            className="rounded-2xl border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
+            className="rounded-lg border border-forest/12 bg-cream px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
             placeholder="010-1234-5678"
             inputMode="numeric"
           />
@@ -453,7 +471,7 @@ export function SignupForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, password: event.target.value }))
               }
-              className="w-full rounded-2xl border border-forest/12 bg-cream px-4 py-3 pr-12 text-base font-medium text-ink outline-none transition focus:border-leaf"
+              className="w-full rounded-lg border border-forest/12 bg-cream px-4 py-3 pr-12 text-base font-medium text-ink outline-none transition focus:border-leaf"
               placeholder="숫자, 특수문자 포함 8자 이상"
             />
             <button
@@ -484,7 +502,7 @@ export function SignupForm() {
                   confirmPassword: event.target.value,
                 }))
               }
-              className="w-full rounded-2xl border border-forest/12 bg-cream px-4 py-3 pr-12 text-base font-medium text-ink outline-none transition focus:border-leaf"
+              className="w-full rounded-lg border border-forest/12 bg-cream px-4 py-3 pr-12 text-base font-medium text-ink outline-none transition focus:border-leaf"
               placeholder="비밀번호를 다시 입력"
             />
             <button
@@ -503,13 +521,35 @@ export function SignupForm() {
         </label>
         </div>
 
-        <div className="grid gap-5 rounded-[2rem] border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
+        <div className="grid gap-5 rounded-lg border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
         <div className="flex items-center gap-2 text-forest">
           <ShieldCheck className="size-5 text-leaf" aria-hidden="true" />
           <h3 className="text-xl font-bold">약관 동의</h3>
         </div>
 
-        <label className="grid gap-3 rounded-2xl border border-forest/10 bg-cream p-5">
+        <label className={`grid gap-3 rounded-lg border p-5 transition ${agreementCardClass(allAccepted)}`}>
+          <span className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={allAccepted}
+              onChange={(event) => {
+                const checked = event.target.checked;
+                setForm((current) => ({
+                  ...current,
+                  privacyAccepted: checked,
+                  termsAccepted: checked,
+                  marketingAccepted: checked,
+                  smsAgree: checked,
+                  emailAgree: checked,
+                }));
+              }}
+              className="mt-1 size-4 accent-leaf"
+            />
+            <span className="text-sm font-bold text-forest">모두 동의합니다.</span>
+          </span>
+        </label>
+
+        <label className={`grid gap-3 rounded-lg border p-5 transition ${agreementCardClass(form.privacyAccepted)}`}>
           <span className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -524,7 +564,7 @@ export function SignupForm() {
             />
             <span>
               <span className="text-sm font-bold text-forest">
-                {signupPolicies.privacy.title} (필수)
+                {signupPolicies.privacy.title} <span className="text-leaf">[필수]</span>
               </span>
               <span className="mt-2 block text-sm leading-7 text-muted">
                 {signupPolicies.privacy.content}
@@ -533,7 +573,7 @@ export function SignupForm() {
           </span>
         </label>
 
-        <label className="grid gap-3 rounded-2xl border border-forest/10 bg-cream p-5">
+        <label className={`grid gap-3 rounded-lg border p-5 transition ${agreementCardClass(form.termsAccepted)}`}>
           <span className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -548,7 +588,7 @@ export function SignupForm() {
             />
             <span>
               <span className="text-sm font-bold text-forest">
-                {signupPolicies.terms.title} (필수)
+                {signupPolicies.terms.title} <span className="text-leaf">[필수]</span>
               </span>
               <span className="mt-2 block text-sm leading-7 text-muted">
                 {signupPolicies.terms.content}
@@ -557,7 +597,7 @@ export function SignupForm() {
           </span>
         </label>
 
-        <label className="grid gap-3 rounded-2xl border border-forest/10 bg-cream p-5">
+        <label className={`grid gap-3 rounded-lg border p-5 transition ${agreementCardClass(form.marketingAccepted)}`}>
           <span className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -575,7 +615,7 @@ export function SignupForm() {
             />
             <span>
               <span className="text-sm font-bold text-forest">
-                {signupPolicies.marketing.title} (선택)
+                {signupPolicies.marketing.title} <span className="text-muted">[선택]</span>
               </span>
               <span className="mt-2 block text-sm leading-7 text-muted">
                 {signupPolicies.marketing.content}
@@ -585,7 +625,12 @@ export function SignupForm() {
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex items-center gap-3 rounded-2xl border border-forest/10 px-4 py-4 text-sm font-semibold text-forest">
+          <label
+            className={`flex items-center gap-3 rounded-lg border px-4 py-4 text-sm font-semibold transition ${agreementCardClass(
+              form.emailAgree,
+              !form.marketingAccepted,
+            )}`}
+          >
             <input
               type="checkbox"
               checked={form.emailAgree}
@@ -598,9 +643,16 @@ export function SignupForm() {
               }
               className="size-4 accent-leaf"
             />
-            이메일 수신 동의
+            <span>
+              이메일 수신 동의 <span className="text-muted">[선택]</span>
+            </span>
           </label>
-          <label className="flex items-center gap-3 rounded-2xl border border-forest/10 px-4 py-4 text-sm font-semibold text-forest">
+          <label
+            className={`flex items-center gap-3 rounded-lg border px-4 py-4 text-sm font-semibold transition ${agreementCardClass(
+              form.smsAgree,
+              !form.marketingAccepted,
+            )}`}
+          >
             <input
               type="checkbox"
               checked={form.smsAgree}
@@ -613,7 +665,9 @@ export function SignupForm() {
               }
               className="size-4 accent-leaf"
             />
-            SMS 수신 동의
+            <span>
+              SMS 수신 동의 <span className="text-muted">[선택]</span>
+            </span>
           </label>
         </div>
         </div>
@@ -621,7 +675,7 @@ export function SignupForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="focus-ring inline-flex items-center justify-center gap-2 rounded-2xl bg-forest px-6 py-4 text-base font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
+          className="focus-ring inline-flex items-center justify-center gap-2 rounded-lg bg-forest px-6 py-4 text-base font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
         >
           {isSubmitting ? "가입 처리 중..." : "회원가입"}
           <ArrowRight className="size-5" aria-hidden="true" />

@@ -2,23 +2,52 @@ import type { Metadata } from "next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { Suspense } from "react";
 import { NavigationProgress } from "@/components/navigation-progress";
+import { getSiteUrl, siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: siteConfig.name,
   title: {
-    default: "비영리민간단체 자람",
-    template: "%s | 비영리민간단체 자람",
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    "비영리민간단체 자람은 어린이집과 다함께키움센터 등 아동 돌봄과 성장 관련 시설을 운영하며 지역사회와 함께합니다.",
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: "/favicon.png",
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    other: {
+      "naver-site-verification": process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
+        ? [process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION]
+        : [],
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
-    title: "비영리민간단체 자람",
-    description: "아이와 가족, 지역사회가 함께 자라는 돌봄",
+    title: siteConfig.name,
+    description: siteConfig.slogan,
     type: "website",
     locale: "ko_KR",
+    url: siteUrl,
+    siteName: siteConfig.name,
   },
 };
 

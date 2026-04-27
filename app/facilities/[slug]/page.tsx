@@ -86,8 +86,10 @@ export default async function FacilityPage({ params }: PageProps) {
                       key={item.href}
                       href={item.href}
                       className={[
-                        "focus-ring -ml-[1.0625rem] flex items-center gap-3 rounded-md py-2 pl-0 pr-3 text-sm transition",
-                        active ? "font-bold text-forest" : "font-medium text-muted hover:text-forest",
+                        "focus-ring -ml-[1.0625rem] flex items-center gap-3 rounded-md py-2 pl-0 pr-3 text-sm transition duration-200",
+                        active
+                          ? "bg-white font-bold text-forest shadow-[0_10px_24px_rgba(47,80,61,0.08)]"
+                          : "font-medium text-muted hover:bg-white/80 hover:pl-1 hover:text-forest",
                       ].join(" ")}
                     >
                       <span className={active ? "h-7 w-0.5 bg-leaf" : "h-7 w-0.5 bg-transparent"} aria-hidden="true" />

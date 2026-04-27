@@ -71,7 +71,7 @@ export async function SiteHeader() {
                           <Link
                             key={link.href}
                             href={link.href}
-                            className="focus-ring inline-flex items-center gap-2 rounded-md text-base font-bold text-forest transition hover:text-leaf"
+                            className="focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-base font-bold text-forest transition hover:bg-white/80 hover:text-leaf"
                           >
                             {link.label}
                             <ChevronRight size={18} aria-hidden="true" />
@@ -91,7 +91,7 @@ export async function SiteHeader() {
                         subItem.href.startsWith("/support/") ? (
                           <SupportPendingDialog
                             key={subItem.href}
-                            className="focus-ring group/link flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-base font-normal text-forest/84 transition hover:bg-mint hover:text-forest"
+                            className="focus-ring group/link flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-base font-medium text-forest/84 transition duration-200 hover:bg-mint hover:pl-4 hover:text-forest hover:shadow-[inset_0_0_0_1px_rgba(70,132,75,0.12)]"
                           >
                             {SubIcon ? (
                               <SubIcon className="size-5 shrink-0 text-leaf" aria-hidden="true" />
@@ -106,7 +106,7 @@ export async function SiteHeader() {
                           <Link
                             key={subItem.href}
                             href={subItem.href}
-                            className="focus-ring group/link flex items-center gap-3 rounded-md px-3 py-3 text-base font-normal text-forest/84 transition hover:bg-mint hover:text-forest"
+                            className="focus-ring group/link flex items-center gap-3 rounded-md px-3 py-3 text-base font-medium text-forest/84 transition duration-200 hover:bg-mint hover:pl-4 hover:text-forest hover:shadow-[inset_0_0_0_1px_rgba(70,132,75,0.12)]"
                           >
                             {SubIcon ? (
                               <SubIcon className="size-5 shrink-0 text-leaf" aria-hidden="true" />

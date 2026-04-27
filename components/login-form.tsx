@@ -79,7 +79,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="grid gap-6 rounded-[2rem] border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
+    <div className="grid gap-6 rounded-lg border border-forest/10 bg-white p-6 shadow-soft sm:p-8">
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-2xl border border-[#f2b1a8] bg-[#fff4f1] px-4 py-3 text-sm font-semibold text-[#a13a29]">
           <span>{error}</span>
@@ -165,7 +165,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="focus-ring mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-forest px-6 py-4 text-base font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
+          className="focus-ring mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-forest px-6 py-4 text-base font-bold text-white transition hover:bg-leaf disabled:cursor-not-allowed disabled:bg-forest/45"
         >
           {isSubmitting ? "로그인 중..." : "로그인"}
           <ArrowRight className="size-5" aria-hidden="true" />
@@ -173,7 +173,7 @@ export function LoginForm() {
       </form>
 
       {isRecoveryOpen ? (
-        <form onSubmit={sendRecovery} className="grid gap-3 rounded-2xl border border-leaf/15 bg-mint/60 p-4">
+        <form onSubmit={sendRecovery} className="grid gap-3 rounded-lg border border-leaf/15 bg-mint/60 p-4">
           <label className="grid gap-2 text-sm font-semibold text-forest">
             재설정 메일 받을 이메일
             <input
@@ -181,14 +181,14 @@ export function LoginForm() {
               type="email"
               value={recoveryEmail}
               onChange={(event) => setRecoveryEmail(event.target.value)}
-              className="rounded-2xl border border-forest/12 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
+              className="rounded-lg border border-forest/12 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition focus:border-leaf"
               placeholder="gildong@email.com"
             />
           </label>
           <button
             type="submit"
             disabled={isSendingRecovery}
-            className="focus-ring rounded-2xl border border-leaf/22 bg-white px-4 py-3 text-sm font-bold text-forest transition hover:border-leaf hover:bg-mint disabled:cursor-not-allowed disabled:border-forest/10 disabled:bg-cream disabled:text-muted"
+            className="focus-ring rounded-lg border border-leaf/22 bg-white px-4 py-3 text-sm font-bold text-forest transition hover:border-leaf hover:bg-mint disabled:cursor-not-allowed disabled:border-forest/10 disabled:bg-cream disabled:text-muted"
           >
             {isSendingRecovery ? "발송 중..." : "재설정 메일 발송"}
           </button>
