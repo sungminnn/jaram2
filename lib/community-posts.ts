@@ -24,6 +24,7 @@ const pageToCategory = {
   qna: "qna",
 } satisfies Record<DbPostPage, CommunityPost["category"]>;
 const newPostWindowMs = 3 * 24 * 60 * 60 * 1000;
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
 function asString(value: unknown) {
   return typeof value === "string" ? value : undefined;
@@ -332,6 +333,10 @@ function rowTime(row: PostRow) {
 }
 
 export async function getCommunityPosts(category: CommunityPost["category"]) {
+  if (isBuildPhase) {
+    return [];
+  }
+
   if (!supabaseUrl || !supabaseKey) {
     console.warn("Supabase environment variables are not configured.");
     return [];
@@ -385,6 +390,10 @@ export async function getCommunityPosts(category: CommunityPost["category"]) {
 
 export async function getRecentCommunityCategories() {
   const result = new Set<CommunityPost["category"]>();
+
+  if (isBuildPhase) {
+    return result;
+  }
 
   if (!supabaseUrl || !supabaseKey) {
     return result;
