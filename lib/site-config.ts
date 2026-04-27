@@ -14,6 +14,7 @@ export const siteConfig = {
   description:
     "비영리민간단체 자람은 어린이집과 다함께키움센터 등 아동 돌봄과 성장 관련 시설을 운영하며 지역사회와 함께합니다.",
   slogan: "아이와 가족, 지역사회가 함께 자라는 돌봄",
+  ogImage: "/favicon.png",
   keywords: [
     "비영리민간단체 자람",
     "자람",

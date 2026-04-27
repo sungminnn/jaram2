@@ -40,8 +40,17 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: siteConfig.name,
-    description: siteConfig.slogan,
+    description: siteConfig.description,
     url: "/",
+    type: "website",
+    locale: "ko_KR",
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        alt: siteConfig.name,
+      },
+    ],
   },
 };
 
