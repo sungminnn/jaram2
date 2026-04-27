@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/about/founding", priority: 0.9 },
     { path: "/about/vision", priority: 0.9 },
     { path: "/about/organization", priority: 0.8 },
+    { path: "/about/location", priority: 0.8 },
     { path: "/news/notices", priority: 0.8 },
     { path: "/news/stories", priority: 0.8 },
     { path: "/news/gallery", priority: 0.8 },

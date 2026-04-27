@@ -8,6 +8,8 @@ type PageProps = {
   params: Promise<{ category: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function WritePage({ params }: PageProps) {
   const { category } = await params;
 

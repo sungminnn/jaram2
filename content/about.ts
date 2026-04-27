@@ -145,3 +145,14 @@ export const organizationContent = {
     },
   ],
 };
+
+export const locationContent = {
+  eyebrow: "LOCATION",
+  title: "오시는 길",
+  summary: "비영리민간단체 자람 사무실 위치와 방문 정보를 안내합니다.",
+  address: "서울특별시 강남구 일원로 5길 29, 지층 101호",
+  roadAddress: "서울특별시 강남구 일원로5길 29",
+  latitude: 37.491691770880585,
+  longitude: 127.08294486778291,
+  phone: "02-3411-2555",
+};

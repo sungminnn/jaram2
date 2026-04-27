@@ -28,6 +28,8 @@ import { getSiteUrl, siteConfig } from "@/lib/site-config";
 
 const siteUrl = getSiteUrl();
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: {
     absolute: siteConfig.name,

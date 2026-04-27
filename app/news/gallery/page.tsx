@@ -11,6 +11,8 @@ type GalleryPageProps = {
   searchParams: Promise<{ page?: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 const pageSize = 6;
 
 function pageHref(page: number) {

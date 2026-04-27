@@ -25,6 +25,7 @@ const pageToCategory = {
 } satisfies Record<DbPostPage, CommunityPost["category"]>;
 const newPostWindowMs = 3 * 24 * 60 * 60 * 1000;
 const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+const isDevelopment = process.env.NODE_ENV === "development";
 
 function asString(value: unknown) {
   return typeof value === "string" ? value : undefined;
@@ -432,7 +433,9 @@ export async function getRecentCommunityCategories() {
       }
     });
   } catch (error) {
-    console.warn(error);
+    if (!isDevelopment) {
+      console.warn(error);
+    }
   }
 
   return result;

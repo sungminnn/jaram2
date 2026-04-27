@@ -12,6 +12,8 @@ type PageProps = {
   params: Promise<{ category: string; id: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 function readPostAccess(value: string | undefined) {
   if (!value) {
     return {};

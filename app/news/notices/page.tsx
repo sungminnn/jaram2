@@ -11,6 +11,8 @@ type NoticesPageProps = {
   searchParams: Promise<{ page?: string; q?: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 const pageSize = 5;
 
 function pageHref(page: number, query: string) {

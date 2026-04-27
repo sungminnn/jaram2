@@ -9,7 +9,6 @@ import { PrivatePostUnlockForm } from "@/components/private-post-unlock-form";
 import { QnaComments } from "@/components/qna-comments";
 import {
   communityCategoryMeta,
-  communityPosts,
   isPostCategory,
   type CommunityPost,
 } from "@/content/community";
@@ -21,12 +20,7 @@ type PageProps = {
   params: Promise<{ category: string; id: string }>;
 };
 
-export function generateStaticParams() {
-  return communityPosts.map((post) => ({
-    category: post.category,
-    id: post.id,
-  }));
-}
+export const dynamic = "force-dynamic";
 
 function categoryHref(category: CommunityPost["category"]) {
   return `/news/${category}`;

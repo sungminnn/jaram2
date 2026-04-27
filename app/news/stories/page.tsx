@@ -11,6 +11,8 @@ type StoriesPageProps = {
   searchParams: Promise<{ page?: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 const pageSize = 4;
 
 function pageHref(page: number) {
