@@ -29,6 +29,14 @@ export function NavigationProgress() {
   }, [pathname, searchParams]);
 
   useEffect(() => {
+    document.body.dataset.navigationPending = isNavigating ? "true" : "false";
+
+    return () => {
+      delete document.body.dataset.navigationPending;
+    };
+  }, [isNavigating]);
+
+  useEffect(() => {
     if (!isNavigating) {
       return;
     }
@@ -82,8 +90,12 @@ export function NavigationProgress() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-1 overflow-hidden bg-leaf/15" aria-hidden="true">
-      <div className="h-full w-1/2 animate-navigation-progress bg-leaf shadow-[0_0_18px_rgba(70,132,75,0.45)]" />
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] h-1 overflow-hidden bg-leaf/10" aria-hidden="true">
+      <div className="h-full w-1/3 animate-navigation-progress bg-leaf shadow-[0_0_18px_rgba(70,132,75,0.45)]" />
+      <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-cream/92 px-3 py-1.5 text-xs font-semibold text-forest shadow-[0_10px_30px_rgba(31,42,36,0.12)] backdrop-blur sm:right-6 lg:right-8">
+        <span className="size-3.5 animate-navigation-spinner rounded-full border-2 border-leaf/25 border-t-leaf" />
+        <span>불러오는 중</span>
+      </div>
     </div>
   );
 }

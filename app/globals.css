@@ -31,6 +31,10 @@ body {
   overflow-wrap: break-word;
 }
 
+body[data-navigation-pending="true"] {
+  cursor: progress;
+}
+
 ::selection {
   background: rgba(139, 207, 115, 0.45);
 }
@@ -149,6 +153,16 @@ select {
   animation: navigation-progress 1.1s ease-in-out infinite;
 }
 
+@keyframes navigation-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-navigation-spinner {
+  animation: navigation-spinner 0.8s linear infinite;
+}
+
 .reveal-section,
 .reveal-card {
   opacity: 0;
@@ -234,6 +248,8 @@ select {
   .hero-fade-slide,
   .sliding-img-frame-to-start,
   .sliding-img-frame-to-start-sm,
+  .animate-navigation-progress,
+  .animate-navigation-spinner,
   .reveal-section,
   .reveal-card {
     animation: none;
