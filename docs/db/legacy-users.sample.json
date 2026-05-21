@@ -1,0 +1,20 @@
+[
+  {
+    "email": "user@example.com",
+    "password_hash": "$2a$10$examplebcryptpasswordhashforimportonly",
+    "user_name": "Sample User",
+    "phone": "01000000000",
+    "sms_agree": true,
+    "email_agree": true,
+    "role": "user"
+  },
+  {
+    "email": "admin@example.com",
+    "password_hash": "$2a$10$examplebcryptpasswordhashforadminonly",
+    "user_name": "Sample Admin",
+    "phone": "01011112222",
+    "sms_agree": false,
+    "email_agree": false,
+    "role": "admin"
+  }
+]
