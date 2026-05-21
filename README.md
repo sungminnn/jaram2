@@ -1,9 +1,43 @@
-# jaram2
-jaram renewal site
+# Jaram Renewal
 
-## Signup setup
+A full-stack renewal project for the Jaram organization website. The application modernizes a legacy Spring/JSP-based site into a Next.js App Router architecture with structured content pages, authentication, community boards, file access routes, editor image uploads, email verification, and migration tooling for legacy users.
 
-회원가입 기능은 다음 환경변수를 사용합니다.
+## Highlights
+
+- Rebuilt a legacy public website as a modern Next.js 15 application with TypeScript and React 19.
+- Implemented organization pages, facility detail pages, news categories, FAQ, gallery, Q&A, and community post workflows.
+- Built API routes for authentication, email verification, login/logout, password recovery, posts, comments, file downloads, view counts, access checks, and editor image uploads.
+- Integrated Supabase-style server utilities and database scripts for auth, profile management, post data, comments, file metadata, and row-level security policy setup.
+- Added a migration script to move legacy users into the new authentication/profile model while preserving existing password hashes where available.
+- Included SEO infrastructure through dynamic sitemap and robots routes.
+
+## Tech Stack
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- Supabase-oriented database/auth integration
+- Nodemailer
+- Lucide React
+
+## Project Structure
+
+```text
+app/
+  api/                 # Auth, posts, comments, files, editor images
+  about/               # Organization introduction pages
+  facilities/          # Facility detail pages
+  news/                # Notices, stories, gallery, Q&A, FAQ, post CRUD
+components/            # Shared UI and feature components
+content/               # Page copy and structured content
+docs/db/               # Database schema, migration, and security SQL
+lib/                   # Server utilities and community post logic
+scripts/               # Legacy migration tooling
+_lagacy/               # Original legacy application reference
+```
+
+## Environment Variables
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -18,34 +52,28 @@ SMTP_PASS=
 MAIL_FROM=
 ```
 
-필요 작업:
+## Run Locally
 
-1. `docs/db/signup-auth.sql`을 Supabase SQL Editor에서 실행
-2. `jaram` 스키마가 API Exposed Schema에 포함되어 있는지 확인
-3. `profiles` 테이블이 현재 운영 스키마와 동일한지 확인
-4. `nodemailer`, `@types/nodemailer` 설치
+```bash
+npm install
+npm run dev
+```
 
-## Legacy user migration
+Open `http://localhost:3000`.
 
-기존 `jaram.legacy_users` 또는 별도 추출 데이터에서 Supabase Auth + `jaram.profiles`로 사용자를 이관할 수 있습니다.
+## Database Setup
 
-입력 예시는 `docs/db/legacy-users.sample.json`을 참고합니다.
+Run the SQL files in `docs/db/` for the target database environment. The key files cover signup/auth tables, post migration, comments, file metadata, and security policies.
+
+## Legacy User Migration
 
 ```bash
 node --env-file=.env.local scripts/migrate-legacy-users.mjs --dry-run docs/db/legacy-users.sample.json
 node --env-file=.env.local scripts/migrate-legacy-users.mjs docs/db/legacy-users.sample.json
 ```
 
-TLS 프록시/사내 인증서 환경에서 `fetch failed` 또는 `SELF_SIGNED_CERT_IN_CHAIN`가 나오면:
+The migration reuses existing auth users when possible, upserts profile records, and keeps `profiles.id` aligned with the authentication user id.
 
-```bash
-SUPABASE_MIGRATION_INSECURE_TLS=1 node --env-file=.env.local scripts/migrate-legacy-users.mjs --dry-run docs/db/legacy-users.sample.json
-```
+## Resume Notes
 
-위 방법은 임시 우회용입니다. 가능하면 사내 루트 인증서를 설치하고 `NODE_EXTRA_CA_CERTS`로 해결하는 편이 안전합니다.
-
-규칙:
-
-1. `password_hash`가 있으면 Supabase Auth의 `password_hash`로 그대로 넣습니다. bcrypt 해시 이관 가능.
-2. 동일 이메일 Auth 사용자가 이미 있으면 재사용하고 `profiles`만 upsert 합니다.
-3. `profiles.id`는 반드시 Auth user id와 동일하게 저장됩니다.
+This project demonstrates practical full-stack migration work: legacy analysis, App Router architecture, API route design, authentication flows, database planning, content modeling, SEO support, and operational migration tooling.

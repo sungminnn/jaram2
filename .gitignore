@@ -1,4 +1,25 @@
 node_modules
 .next
-.env*.local
-._lagacy
+out
+dist
+build
+target
+*.tsbuildinfo
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Secrets and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Local/private migration inputs
+docs/db/legacy-users.import.json
+
+# Legacy build output
+_lagacy/target/
