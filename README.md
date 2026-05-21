@@ -2,6 +2,10 @@
 
 A full-stack renewal project for the Jaram organization website. The application modernizes a legacy Spring/JSP-based site into a Next.js App Router architecture with structured content pages, authentication, community boards, file access routes, editor image uploads, email verification, and migration tooling for legacy users.
 
+## Live Site
+
+[www.seoul-jaram.com](https://www.seoul-jaram.com)
+
 ## Highlights
 
 - Rebuilt a legacy public website as a modern Next.js 15 application with TypeScript and React 19.
@@ -34,7 +38,6 @@ content/               # Page copy and structured content
 docs/db/               # Database schema, migration, and security SQL
 lib/                   # Server utilities and community post logic
 scripts/               # Legacy migration tooling
-_lagacy/               # Original legacy application reference
 ```
 
 ## Environment Variables
