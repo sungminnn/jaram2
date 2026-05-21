@@ -2,6 +2,10 @@
 
 A full-stack renewal project for the Jaram organization website. The application modernizes a legacy Spring/JSP-based site into a Next.js App Router architecture with structured content pages, authentication, community boards, file access routes, editor image uploads, email verification, and migration tooling for legacy users.
 
+## Overview
+
+This project covers the renewal of a legacy organization website into a production Next.js application, including public content pages, community workflows, authentication support, database planning, SEO routes, and operational migration tooling.
+
 ## Live Site
 
 [www.seoul-jaram.com](https://www.seoul-jaram.com)
@@ -76,7 +80,3 @@ node --env-file=.env.local scripts/migrate-legacy-users.mjs docs/db/legacy-users
 ```
 
 The migration reuses existing auth users when possible, upserts profile records, and keeps `profiles.id` aligned with the authentication user id.
-
-## Overview
-
-This project covers the renewal of a legacy organization website into a production Next.js application, including public content pages, community workflows, authentication support, database planning, SEO routes, and operational migration tooling.
