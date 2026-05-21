@@ -18,7 +18,7 @@ target
 *.pfx
 *.jks
 
-# Local/private migration inputs
+# Local/private migration inputs 
 docs/db/legacy-users.import.json
 
 # Legacy build output
