@@ -77,6 +77,6 @@ node --env-file=.env.local scripts/migrate-legacy-users.mjs docs/db/legacy-users
 
 The migration reuses existing auth users when possible, upserts profile records, and keeps `profiles.id` aligned with the authentication user id.
 
-## Resume Notes
+## Overview
 
-This project demonstrates practical full-stack migration work: legacy analysis, App Router architecture, API route design, authentication flows, database planning, content modeling, SEO support, and operational migration tooling.
+This project covers the renewal of a legacy organization website into a production Next.js application, including public content pages, community workflows, authentication support, database planning, SEO routes, and operational migration tooling.
